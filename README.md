@@ -3,6 +3,6 @@
 
 #### Skill
 
-- django 3
+- django
 - react
 - antd
