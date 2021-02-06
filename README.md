@@ -6,3 +6,4 @@
 - django
 - react
 - antd
+- axios

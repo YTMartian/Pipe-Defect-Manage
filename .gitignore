@@ -3,3 +3,7 @@ db.sqlite3
 blog/migrations
 blog/__pycache__
 myblog/__pycache__
+frontend/.idea
+frontend/node_modules
+frontend/.eslintcache
+frontend/build
