@@ -7,7 +7,6 @@ import App from './App';
 import * as serviceWorker from './serviceWorker';
 
 import {icons} from './assets/icons'
-
 import {Provider} from 'react-redux'
 import store from './store'
 import zhCN from 'antd/lib/locale/zh_CN';

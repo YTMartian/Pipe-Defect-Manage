@@ -1,10 +1,18 @@
-import React, {useState} from "react";
-import 'antd/dist/antd.css';
+import {useHistory} from "react-router-dom"
+import request from "../../../request"
+import React, {useState} from "react"
+import 'antd/dist/antd.css'
 import './style.css'
-import {Table, Button, Popconfirm, message, Input, Tooltip, DatePicker, Select} from 'antd';
-import request from "../../../request";
-import {useHistory} from "react-router-dom";
-import {PlusOutlined, DeleteOutlined} from "@ant-design/icons";
+import {
+    Table,
+    Button,
+    Popconfirm,
+    message,
+    Input,
+    Tooltip,
+    DatePicker,
+    Select
+} from 'antd';
 
 const {Search} = Input;
 const {RangePicker} = DatePicker;
@@ -43,25 +51,16 @@ const ProjectList = () => {
                 }
                 setData({currentData: newData, allData: newData});
             } else {
-                message.error('获取失败： ' + response.data.msg, 3)
+                message.error('获取失败1' + response.data.msg, 3)
             }
         }).catch(function (error) {
-            message.error('删除失败', error);
+            message.error('删除失败2'+ error);
         });
     };
     if (initialization) {
         getProject();
         setInitialization(false);
     }
-
-
-    const handleLine = (project_id) => {
-        message.info(project_id, 3)
-    };
-
-    const handleVideo = (project_id) => {
-        message.info(project_id, 3)
-    };
 
     const handleDelete = (selectedRowKeys) => {
         if (selectedRowKeys.length === 0) {
@@ -79,10 +78,10 @@ const ProjectList = () => {
                 message.success('删除成功');
                 getProject();
             } else {
-                message.error('删除失败： ' + response.data.msg, 3)
+                message.error('删除失败1' + response.data.msg, 3)
             }
         }).catch(function (error) {
-            message.error('删除失败', error);
+            message.error('删除失败2'+ error);
         });
     };
 
@@ -96,6 +95,10 @@ const ProjectList = () => {
             if (data.allData[i][searchSelect].includes(value)) newData.push(data.allData[i]);
         }
         setData({currentData: newData, allData: data.allData});
+    };
+
+    const onHandleReport = project_id => {
+        message.info(project_id)
     };
 
     const onRangePickerChange = value => {
@@ -167,7 +170,7 @@ const ProjectList = () => {
             title: '工程编号',
             dataIndex: 'project_no',
             editable: true,
-            width: "14%",
+            width: "12%",
             ellipsis: {
                 showTitle: false,
             },
@@ -182,7 +185,7 @@ const ProjectList = () => {
             title: '工程名称',
             dataIndex: 'project_name',
             editable: true,
-            width: "24%",
+            width: "19%",
             ellipsis: {
                 showTitle: false,
             },
@@ -217,7 +220,7 @@ const ProjectList = () => {
         {
             title: '开工日期',
             editable: true,
-            width: "17%",
+            width: "15%",
             dataIndex: 'start_date',
             ellipsis: {
                 showTitle: false,
@@ -259,17 +262,33 @@ const ProjectList = () => {
             align: "center",
             render: (_, record) => (
                 // eslint-disable-next-line jsx-a11y/anchor-is-valid,no-script-url
-                <a href="javascript:" onClick={() => handleLine(record.key)}>管线</a>
+                <a href="javascript:" onClick={() => history.push({
+                    pathname: '/ProjectManage/LineList',
+                    state: {project_id: record.key, initialization: true}
+                })}>管线</a>
             )
         },
         {
             title: '视频',
             dataIndex: 'video',
             align: "center",
+            width: "10%",
             render:
                 (_, record) =>
                     // eslint-disable-next-line jsx-a11y/anchor-is-valid,no-script-url
-                    <a href="javascript:" onClick={() => handleVideo(record.key)}>视频</a>
+                    <a href="javascript:" onClick={() => history.push({
+                        pathname: '/ProjectManage/VideoList',
+                        state: {project_id: record.key, initialization: true}
+                    })}>视频</a>
+        },
+        {
+            title: '报告',
+            dataIndex: 'report',
+            align: "center",
+            render:
+                (_, record) =>
+                    // eslint-disable-next-line jsx-a11y/anchor-is-valid,no-script-url
+                    <a href="javascript:" onClick={() => onHandleReport(record.key)}>报告</a>
         },
     ];
     return (
@@ -279,7 +298,7 @@ const ProjectList = () => {
                     onClick={() => {
                         history.push({
                             pathname: '/ProjectManage/AddProject',
-                            state: {isEdit: false, project_id: -1, initialization: true}
+                            state: {isEdit: false, initialization: true}
                         })
                     }}
                     type="primary"
@@ -287,7 +306,6 @@ const ProjectList = () => {
                         marginBottom: 16,
                         float: 'left'
                     }}
-                    icon={<PlusOutlined/>}
                 >
                     添加工程
                 </Button>
@@ -313,6 +331,17 @@ const ProjectList = () => {
                         marginLeft: "1%"
                     }}
                 />
+                <Popconfirm title="确定删除?" onConfirm={() => handleDelete(state.selectedRowKeys)}>
+                    <Button
+                        danger
+                        type="primary"
+                        style={{
+                            float: 'right',
+                        }}
+                    >
+                        删除所选
+                    </Button>
+                </Popconfirm>
             </div>
             <Table
                 // bordered
@@ -332,19 +361,6 @@ const ProjectList = () => {
                     triggerDesc: '点击降序'
                 }}
             />
-            <Popconfirm title="确定删除?" onConfirm={() => handleDelete(state.selectedRowKeys)}>
-                <Button
-                    danger
-                    type="primary"
-                    style={{
-                        marginTop: -48,
-                        float: 'left'
-                    }}
-                    icon={<DeleteOutlined/>}
-                >
-                    删除所选
-                </Button>
-            </Popconfirm>
         </>
     );
 };

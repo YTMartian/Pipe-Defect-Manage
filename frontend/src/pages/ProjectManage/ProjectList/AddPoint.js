@@ -10,10 +10,14 @@ import {
     message,
     DatePicker,
     Card,
+    InputNumber,
+    Select,
     Affix,
     Row,
     Col
 } from 'antd'
+
+const {Option} = Select;
 
 message.config({
     top: 200
@@ -52,7 +56,7 @@ const tailFormItemLayout = {
 };
 
 
-const AddProject = () => {
+const AddPoint = () => {
     const history = useHistory();
     const location = useLocation();//获取前一页面history传递的参数
     const [form] = Form.useForm();//对表单数据域进行交互
@@ -62,34 +66,35 @@ const AddProject = () => {
             if (location.state.isEdit) {
                 request({
                     method: 'post',
-                    url: 'get_project/',
+                    url: 'get_point/',
                     data: {
-                        "condition": "project_id",
-                        "project_id": location.state.project_id
+                        "condition": "point_id",
+                        "point_id": location.state.point_id
                     },
                 }).then(function (response) {
                     if (response.data.code === 0) {
                         form.setFieldsValue({
-                            project_no: response.data.list[0]['fields']['project_no'],
-                            project_name: response.data.list[0]['fields']['project_name'],
-                            staff: response.data.list[0]['fields']['staff'],
-                            report_no: response.data.list[0]['fields']['report_no'],
-                            requester_unit: response.data.list[0]['fields']['requester_unit'],
-                            construction_unit: response.data.list[0]['fields']['construction_unit'],
-                            design_unit: response.data.list[0]['fields']['design_unit'],
-                            build_unit: response.data.list[0]['fields']['build_unit'],
-                            supervisory_unit: response.data.list[0]['fields']['supervisory_unit'],
-                            move: response.data.list[0]['fields']['move'],
-                            plugging: response.data.list[0]['fields']['plugging'],
-                            drainage: response.data.list[0]['fields']['drainage'],
-                            dredging: response.data.list[0]['fields']['dredging'],
-                            detection_equipment: response.data.list[0]['fields']['detection_equipment'],
+                            feature: response.data.list[0]['fields']['feature'],
+                            attachment: response.data.list[0]['fields']['attachment'],
+                            height: response.data.list[0]['fields']['height'],
+                            feature_category: response.data.list[0]['fields']['feature_category'],
+                            x_coordinate: response.data.list[0]['fields']['x_coordinate'],
+                            y_coordinate: response.data.list[0]['fields']['y_coordinate'],
+                            depth: response.data.list[0]['fields']['depth'],
+                            road_where: response.data.list[0]['fields']['road_where'],
+                            build_year: response.data.list[0]['fields']['build_year'],
+                            ownership: response.data.list[0]['fields']['ownership'],
+                            detection_unit: response.data.list[0]['fields']['detection_unit'],
+                            supervisor_unit: response.data.list[0]['fields']['supervisor_unit'],
+                            state: response.data.list[0]['fields']['state'],
+                            precision_level: response.data.list[0]['fields']['precision_level'],
+                            remark: response.data.list[0]['fields']['remark'],
                         });
-                        if (response.data.list[0]['fields']['start_date'].length > 0) {
-                            form.setFieldsValue({start_date: moment(response.data.list[0]['fields']['start_date'], 'YYYY-MM-DD')})
+                        if (response.data.list[0]['fields']['detection_date'].length > 0) {
+                            form.setFieldsValue({detection_date: moment(response.data.list[0]['fields']['detection_date'], 'YYYY-MM-DD')})
                         }
                     } else {
-                        message.error('获取工程失败： ' + response.data.msg, 3)
+                        message.error('获取管点失败： ' + response.data.msg, 3)
                     }
                 }).catch(function (error) {
                     message.error(error);
@@ -103,14 +108,14 @@ const AddProject = () => {
     /*三个点用于取出对象中的内容*/
     const onFinish = (values) => {
         //解决时间少8个小时的问题
-        values.start_date = values.start_date != null ? moment(values.start_date).format("YYYY-MM-DD") : "";
-        let data = {"isEdit": false, "values": values};
+        values.detection_date = values.detection_date != null ? moment(values.detection_date).format("YYYY-MM-DD") : "";
+        let data = {"isEdit": false, "line_id": location.state.line_id, "values": values};
         if (location.state.isEdit) {
-            data = {"isEdit": true, "values": values, "project_id": location.state.project_id}
+            data = {"isEdit": true, "values": values, "point_id": location.state.point_id}
         }
         request({
             method: 'post',
-            url: 'add_project/',
+            url: 'add_point/',
             data: data,
         }).then(function (response) {
             if (response.data.code === 0) {
@@ -118,7 +123,7 @@ const AddProject = () => {
                     message.success('修改成功', 3);
                 } else {
                     message.success('添加成功', 3);
-                    history.push('/ProjectManage/ProjectList')
+                    // history.push({state: {line_id: location.state.line_id, initialization: true}})
                 }
             } else {
                 message.error('添加失败： ' + response.data.msg, 3)
@@ -139,104 +144,119 @@ const AddProject = () => {
             >
                 <Row gutter={16}>
                     <Col span={12}>
-                        <Form.Item label="工程编号" name="project_no">
+                        <Form.Item label="管线点特征" name="feature">
                             <Input/>
                         </Form.Item>
                     </Col>
                     <Col span={12}>
-                        <Form.Item label="工程名称" name="project_name" rules={[{required: true, message: '不能为空'}]}>
+                        <Form.Item label="管线附属物" name="attachment">
                             <Input/>
                         </Form.Item>
                     </Col>
                 </Row>
                 <Row gutter={16}>
                     <Col span={12}>
-                        <Form.Item label="负责人" name="staff">
-                            <Input/>
+                        <Form.Item label="点地面高程" name="height" rules={[{required: true, message: '不能为空'}]}>
+                            <InputNumber/>
                         </Form.Item>
                     </Col>
                     <Col span={12}>
-                        <Form.Item label="开工日期" name="start_date">
+                        <Form.Item label="要素类别" name="feature_category"
+                                   rules={[{required: true, message: '不能为空'}]}>
+                            <Select>
+                                <Option value="雨水">雨水</Option>
+                                <Option value="污水">污水</Option>
+                                <Option value="合流">合流</Option>
+                            </Select>
+                        </Form.Item>
+                    </Col>
+                </Row>
+                <Row gutter={16}>
+                    <Col span={12}>
+                        <Form.Item label="X坐标" name="x_coordinate" rules={[{required: true, message: '不能为空'}]}>
+                            <InputNumber/>
+                        </Form.Item>
+                    </Col>
+                    <Col span={12}>
+                        <Form.Item label="Y坐标" name="y_coordinate" rules={[{required: true, message: '不能为空'}]}>
+                            <InputNumber/>
+                        </Form.Item>
+                    </Col>
+                </Row>
+                <Row gutter={16}>
+                    <Col span={12}>
+                        <Form.Item label="井底埋深" name="depth" rules={[{required: true, message: '不能为空'}]}>
+                            <InputNumber/>
+                        </Form.Item>
+                    </Col>
+                    <Col span={12}>
+                        <Form.Item label="所在道路" name="road_where">
+                            <Input/>
+                        </Form.Item>
+                    </Col>
+                </Row>
+                <Row gutter={16}>
+                    <Col span={12}>
+                        <Form.Item label="埋设年代" name="build_year">
+                            <InputNumber/>
+                        </Form.Item>
+                    </Col>
+                    <Col span={12}>
+                        <Form.Item label="权属单位" name="ownership">
+                            <Input/>
+                        </Form.Item>
+                    </Col>
+                </Row>
+                <Row gutter={16}>
+                    <Col span={12}>
+                        <Form.Item label="探测日期" name="detection_date">
                             <DatePicker placeholder="选择日期"/>
                         </Form.Item>
                     </Col>
-                </Row>
-                <Row gutter={16}>
                     <Col span={12}>
-                        <Form.Item label="报告编号" name="report_no">
-                            <Input/>
-                        </Form.Item>
-                    </Col>
-                    <Col span={12}>
-                        <Form.Item label="委托单位" name="requester_unit">
+                        <Form.Item label="探测单位" name="detection_unit">
                             <Input/>
                         </Form.Item>
                     </Col>
                 </Row>
                 <Row gutter={16}>
                     <Col span={12}>
-                        <Form.Item label="建设单位" name="construction_unit">
+                        <Form.Item label="监理单位" name="supervisor_unit">
                             <Input/>
                         </Form.Item>
                     </Col>
                     <Col span={12}>
-                        <Form.Item label="设计单位" name="design_unit">
+                        <Form.Item label="状态" name="state">
                             <Input/>
                         </Form.Item>
                     </Col>
                 </Row>
                 <Row gutter={16}>
                     <Col span={12}>
-                        <Form.Item label="施工单位" name="build_unit">
+                        <Form.Item label="精度级别" name="precision_level">
                             <Input/>
                         </Form.Item>
                     </Col>
                     <Col span={12}>
-                        <Form.Item label="监理单位" name="supervisory_unit">
-                            <Input/>
+                        <Form.Item label="备注" name="remark">
+                            <Input.TextArea autoSize={{ minRows: 1}}/>
                         </Form.Item>
                     </Col>
                 </Row>
-                <Row gutter={16}>
-                    <Col span={12}>
-                        <Form.Item label="移动方式" name="move">
-                            <Input/>
-                        </Form.Item>
-                    </Col>
-                    <Col span={12}>
-                        <Form.Item label="封堵方式" name="plugging">
-                            <Input/>
-                        </Form.Item>
-                    </Col>
-                </Row>
-                <Row gutter={16}>
-                    <Col span={12}>
-                        <Form.Item label="排水方式" name="drainage">
-                            <Input/>
-                        </Form.Item>
-                    </Col>
-                    <Col span={12}>
-                        <Form.Item label="清疏方式" name="dredging">
-                            <Input/>
-                        </Form.Item>
-                    </Col>
-                </Row>
-                <Row gutter={16}>
-                    <Col span={12}>
-                        <Form.Item label="检测设备" name="detection_equipment">
-                            <Input/>
-                        </Form.Item>
-                    </Col>
-                </Row>
-
-
                 <Form.Item {...tailFormItemLayout}>
                     <Affix offsetBottom={10}>
                         <Button type="primary" htmlType="submit">
                             确定
                         </Button>
                         <Button onClick={() => {
-                            history.push('/ProjectManage/ProjectList')
+                            history.push({
+                                pathname: '/ProjectManage/PointList',
+                                state: {
+                                    project_id: location.state.project_id,
+                                    line_id: location.state.line_id,
+                                    initialization: true
+                                }
+                            })
                         }}>
                             返回
                         </Button>
@@ -247,4 +267,4 @@ const AddProject = () => {
     )
 };
 
-export default AddProject;
+export default AddPoint;

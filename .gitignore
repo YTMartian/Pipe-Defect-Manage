@@ -1,5 +1,4 @@
 .idea
-db.sqlite3
 blog/migrations
 blog/__pycache__
 myblog/__pycache__

@@ -1,3 +1,9 @@
 .ant-table table {
     font-size: 15px;
 }
+
+.video-style {
+    width: 90%;
+    height: auto;
+    max-height: 75vh;
+}
