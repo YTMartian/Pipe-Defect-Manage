@@ -84,6 +84,8 @@ const AddLine = () => {
                             start_y_coordinate: response.data.list[0]['fields']['start_y_coordinate'],
                             end_x_coordinate: response.data.list[0]['fields']['end_x_coordinate'],
                             end_y_coordinate: response.data.list[0]['fields']['end_y_coordinate'],
+                            total_length: response.data.list[0]['fields']['total_length'],
+                            detection_length: response.data.list[0]['fields']['detection_length'],
                             flow_direction: response.data.list[0]['fields']['flow_direction'],
                             sub_level_type: response.data.list[0]['fields']['sub_level_type'],
                             material: response.data.list[0]['fields']['material'],
@@ -99,7 +101,8 @@ const AddLine = () => {
                             precision_level: response.data.list[0]['fields']['precision_level'],
                             remark: response.data.list[0]['fields']['remark'],
                             regional_importance_id: response.data.list[0]['fields']['regional_importance_id'],
-                            soil_id: response.data.list[0]['fields']['soil_id']
+                            soil_id: response.data.list[0]['fields']['soil_id'],
+                            type: response.data.list[0]['fields']['type']
                         });
                         if (response.data.list[0]['fields']['detection_date'].length > 0) {
                             form.setFieldsValue({detection_date: moment(response.data.list[0]['fields']['detection_date'], 'YYYY-MM-DD')})
@@ -134,7 +137,10 @@ const AddLine = () => {
                     message.success('修改成功', 3);
                 } else {
                     message.success('添加成功', 3);
-                    // history.push({state: {project_id: location.state.project_id, initialization: true}})
+                    history.push({
+                        pathname: '/ProjectManage/LineList',
+                        state: {project_id: location.state.project_id, initialization: true}
+                    })
                 }
             } else {
                 message.error('添加失败： ' + response.data.msg, 3)
@@ -239,8 +245,23 @@ const AddLine = () => {
                 </Row>
                 <Row gutter={16}>
                     <Col span={12}>
+                        <Form.Item label="总长度" name="total_length">
+                            <InputNumber min={0}/>
+                        </Form.Item>
+                    </Col>
+                    <Col span={12}>
+                        <Form.Item label="检测长度" name="detection_length">
+                            <InputNumber min={0}/>
+                        </Form.Item>
+                    </Col>
+                </Row>
+                <Row gutter={16}>
+                    <Col span={12}>
                         <Form.Item label="流向" name="flow_direction">
-                            <Select/>
+                            <Select>
+                                <Option value={0}>顺流</Option>
+                                <Option value={1}>逆流</Option>
+                            </Select>
                         </Form.Item>
                     </Col>
                     <Col span={12}>
@@ -323,8 +344,13 @@ const AddLine = () => {
                 </Row>
                 <Row gutter={16}>
                     <Col span={12}>
+                        <Form.Item label="管线类型" name="type">
+                            <Input/>
+                        </Form.Item>
+                    </Col>
+                    <Col span={12}>
                         <Form.Item label="备注" name="remark">
-                            <Input.TextArea autoSize={{ minRows: 1}}/>
+                            <Input.TextArea autoSize={{minRows: 1}}/>
                         </Form.Item>
                     </Col>
                 </Row>

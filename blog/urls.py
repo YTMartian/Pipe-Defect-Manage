@@ -19,4 +19,5 @@ urlpatterns = [
     path('get_defect/', views.get_defect),
     path('delete_defect/', views.delete_defect),
     path('add_defect/', views.add_defect),
+    path('get_report/<int:project_id>', views.get_report),
 ]

@@ -123,7 +123,15 @@ const AddPoint = () => {
                     message.success('修改成功', 3);
                 } else {
                     message.success('添加成功', 3);
-                    // history.push({state: {line_id: location.state.line_id, initialization: true}})
+                    history.push({
+                            pathname: '/ProjectManage/PointList',
+                            state: {
+                                isEdit: false,
+                                project_id: location.state.project_id,
+                                line_id: location.state.line_id,
+                                initialization: true
+                            }
+                        })
                 }
             } else {
                 message.error('添加失败： ' + response.data.msg, 3)

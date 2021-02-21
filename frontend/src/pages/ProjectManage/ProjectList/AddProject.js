@@ -84,6 +84,7 @@ const AddProject = () => {
                             drainage: response.data.list[0]['fields']['drainage'],
                             dredging: response.data.list[0]['fields']['dredging'],
                             detection_equipment: response.data.list[0]['fields']['detection_equipment'],
+                            detection_method: response.data.list[0]['fields']['detection_method'],
                         });
                         if (response.data.list[0]['fields']['start_date'].length > 0) {
                             form.setFieldsValue({start_date: moment(response.data.list[0]['fields']['start_date'], 'YYYY-MM-DD')})
@@ -224,6 +225,11 @@ const AddProject = () => {
                 <Row gutter={16}>
                     <Col span={12}>
                         <Form.Item label="检测设备" name="detection_equipment">
+                            <Input/>
+                        </Form.Item>
+                    </Col>
+                    <Col span={12}>
+                        <Form.Item label="检测方式" name="detection_method">
                             <Input/>
                         </Form.Item>
                     </Col>

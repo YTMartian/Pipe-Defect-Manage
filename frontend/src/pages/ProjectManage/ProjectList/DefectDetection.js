@@ -16,6 +16,7 @@ import {
     Row,
     Col,
     Popconfirm,
+    Slider,
 } from 'antd'
 
 import {CaretLeftFilled, CaretRightFilled} from '@ant-design/icons';
@@ -64,11 +65,80 @@ const DefectDetection = () => {
         const location = useLocation();
         const [form] = Form.useForm();
         const [gradeOption, setGradeOption] = useState(undefined);
-        const [currentDefectIndex, setCurrentDefectIndex] = useState(-1);
+        //使用useRef，useState会数据更新不及时，其实普通变量也可以，因为render里并没有用到该值...
+        const currentDefectIndex = useRef(-1);
         const [deleteDisable, setDeleteDisable] = useState(true);
-        const [allDefects, setAllDefects] = useState([]);
+        const allDefects = useRef([]);//useState会异步更新
         const [myVideo, setMyVideo] = useState(undefined);
-        const videoRef = useRef();//video别名
+        const videoRef = useRef(undefined);//video别名
+        let isDragSlider = useRef(true);
+        const [marks, setMarks] = useState({});
+
+        const setCurrentDefect = () => {
+            let index = currentDefectIndex.current;
+            if (index === -1) {
+                form.setFieldsValue({
+                    time_in_video: '',
+                    defect_type_id: '',
+                    defect_grade_id: '',
+                    defect_distance: '',
+                    defect_length: '',
+                    clock_start: '',
+                    clock_end: '',
+                    defect_date: '',
+                    defect_attribute: '',
+                    defect_remark: '',
+                });
+                setGradeOption([]);
+            } else {
+                form.setFieldsValue({
+                    time_in_video: allDefects.current[index]['fields']['time_in_video'],
+                    defect_type_id: allDefects.current[index]['fields']['defect_type_id'],
+                    defect_distance: allDefects.current[index]['fields']['defect_distance'],
+                    defect_length: allDefects.current[index]['fields']['defect_length'],
+                    clock_start: allDefects.current[index]['fields']['clock_start'],
+                    clock_end: allDefects.current[index]['fields']['clock_end'],
+                    defect_date: allDefects.current[index]['fields']['defect_date'],
+                    defect_attribute: allDefects.current[index]['fields']['defect_attribute'],
+                    defect_remark: allDefects.current[index]['fields']['defect_remark'],
+                });
+                //填入缺陷级别
+                onChangeDefectType({'defect_grade_id': allDefects.current[index]['fields']['defect_grade_id']});
+            }
+        };
+
+        //点击进度条事件，判断附近是否有缺陷，有就在右侧面板展示
+        const onSeeking = () => {
+            if (!isDragSlider.current) {
+                isDragSlider.current = true;
+                return;
+            }
+            let currentSeconds = parseInt(videoRef.current.currentTime);
+            let totalSeconds = parseInt(videoRef.current.duration);
+            let interval = Math.ceil(totalSeconds / 100);//如果当前时间与缺陷时间间隔小于 总时长/100，则认为点到了该缺陷
+            let flag = false;//附近是否存在缺陷
+            for (let i = 0; i < allDefects.current.length; i++) {
+                let seconds = timeToSeconds(allDefects.current[i]['fields']['time_in_video']);
+                if (Math.abs(currentSeconds - seconds) <= interval) {
+                    currentDefectIndex.current = i;
+                    flag = true;
+                    break;
+                }
+            }
+            if (flag) setCurrentDefect();
+        };
+
+        const drawMarks = () => {
+            //在下方进度条上标记缺陷位置
+            let newMarks = {};
+            let totalSeconds = parseInt(videoRef.current.duration);
+            for (let i = 0; i < allDefects.current.length; i++) {
+                let seconds = timeToSeconds(allDefects.current[i]['fields']['time_in_video']);
+                let position = Math.floor(seconds / totalSeconds * 100);
+                if (newMarks[position] === undefined) newMarks[position] = '';
+            }
+            setMarks(newMarks);
+        };
 
         const getAllDefects = () => {
             request({
@@ -82,26 +152,16 @@ const DefectDetection = () => {
                 if (response.data.code === 0) {
                     //表单填入第一个缺陷
                     if (response.data.list.length > 0) {
-                        let index = currentDefectIndex;
-                        if (currentDefectIndex === -1) {
-                            setCurrentDefectIndex(0);
-                            index = 0;
-                        }
-                        form.setFieldsValue({
-                            time_in_video: response.data.list[index]['fields']['time_in_video'],
-                            defect_type_id: response.data.list[index]['fields']['defect_type_id'],
-                            defect_distance: response.data.list[index]['fields']['defect_distance'],
-                            defect_length: response.data.list[index]['fields']['defect_length'],
-                            clock_start: response.data.list[index]['fields']['clock_start'],
-                            clock_end: response.data.list[index]['fields']['clock_end'],
-                            defect_date: response.data.list[index]['fields']['defect_date'],
-                            defect_attribute: response.data.list[index]['fields']['defect_attribute'],
-                            defect_remark: response.data.list[index]['fields']['defect_remark'],
-                        });
+                        if (currentDefectIndex.current === -1) currentDefectIndex.current = 0;
                         setDeleteDisable(false);
-                        setAllDefects(response.data.list);
-                        //填入缺陷级别
-                        onChangeDefectType({'defect_grade_id': response.data.list[index]['fields']['defect_grade_id']});
+                        //按时间先后排序
+                        allDefects.current = response.data.list.sort((a, b) => {
+                            let t1 = timeToSeconds(a['fields']['time_in_video']);
+                            let t2 = timeToSeconds(b['fields']['time_in_video']);
+                            return t1 - t2;
+                        });
+                        setCurrentDefect();
+                        drawMarks();
                     }
                 } else {
                     message.error('获取缺陷失败1:' + response.data.msg, 3)
@@ -128,14 +188,15 @@ const DefectDetection = () => {
                         });
                         //如此一来动态更改video的src
                         //先url编码处理路径，防止\等字符造成url错误
-                        let path = 'http://127.0.0.1:8000/blog/get_video_stream/' + encodeURI(response.data.list[0]['fields']['path']);
+                        let path = request.defaults.baseURL + 'get_video_stream/' + encodeURI(response.data.list[0]['fields']['path']);
                         setMyVideo(<video
                             controls
                             ref={videoRef}
+                            onSeeking={onSeeking}
                             className='video-style'
+                            onCanPlayThrough={drawMarks}//视频加载完毕
                         >
-                            <source
-                                src={path}/>
+                            <source src={path}/>
                         </video>);
                     }
                 }).catch(function (error) {
@@ -149,6 +210,12 @@ const DefectDetection = () => {
         }
 
         const onChangeDefectType = (gradeFlag) => {
+            let structure_defect_ids = [1, 2, 4, 6, 7, 10, 11, 13, 14, 15];
+            if (structure_defect_ids.includes(form.getFieldValue('defect_type_id'))) {
+                form.setFieldsValue({'defect_attribute': '结构性缺陷'});
+            } else {
+                form.setFieldsValue({'defect_attribute': '功能性缺陷'});
+            }
             request({
                 method: 'post',
                 url: 'get_defect_grade/',
@@ -190,52 +257,23 @@ const DefectDetection = () => {
                 method: 'post',
                 url: 'delete_defect/',
                 data: {
-                    "defect_ids": [allDefects[currentDefectIndex]['pk']],
+                    "defect_ids": [allDefects.current[currentDefectIndex.current]['pk']],
                 },
             }).then(function (response) {
                 if (response.data.code === 0) {
                     message.success('删除成功', 3);
-                    let newDefects = allDefects.filter((key, index) => {
-                        return currentDefectIndex !== index;
+                    allDefects.current = allDefects.current.filter((key, index) => {
+                        return currentDefectIndex.current !== index;
                     });
                     //找到下一缺陷
-                    if (newDefects.length === 0) {//没有缺陷则清空
-                        setCurrentDefectIndex(-1);
-                        form.setFieldsValue({
-                            time_in_video: '',
-                            defect_type_id: '',
-                            defect_grade_id: '',
-                            defect_distance: '',
-                            defect_length: '',
-                            clock_start: '',
-                            clock_end: '',
-                            defect_date: '',
-                            defect_attribute: '',
-                            defect_remark: '',
-                        });
-                        setGradeOption([]);
+                    if (allDefects.current.length === 0) {//没有缺陷则清空
+                        currentDefectIndex.current = -1;
                     } else {
-                        //因为set是个异步的过程，可能还没改过来
-                        let index = currentDefectIndex;
-                        if (currentDefectIndex === allDefects.length - 1) {
-                            setCurrentDefectIndex(newDefects.length - 1);
-                            index = newDefects - 1;
+                        if (currentDefectIndex.current === allDefects.current.length) {
+                            currentDefectIndex.current = allDefects.current.length - 1;
                         }
-                        form.setFieldsValue({
-                            time_in_video: newDefects[index]['fields']['time_in_video'],
-                            defect_type_id: newDefects[index]['fields']['defect_type_id'],
-                            defect_distance: newDefects[index]['fields']['defect_distance'],
-                            defect_length: newDefects[index]['fields']['defect_length'],
-                            clock_start: newDefects[index]['fields']['clock_start'],
-                            clock_end: newDefects[index]['fields']['clock_end'],
-                            defect_date: newDefects[index]['fields']['defect_date'],
-                            defect_attribute: newDefects[index]['fields']['defect_attribute'],
-                            defect_remark: newDefects[index]['fields']['defect_remark'],
-                        });
-                        //填入缺陷级别
-                        onChangeDefectType({'defect_grade_id': newDefects[index]['fields']['defect_grade_id']});
                     }
-                    setAllDefects(newDefects);
+                    getAllDefects();
                 } else {
                     message.error('删除失败： ' + response.data.msg, 3)
                 }
@@ -246,7 +284,11 @@ const DefectDetection = () => {
 
         const onFinish = (values) => {
             values.video_id = location.state.video_id;
-            let data = {"isEdit": true, "defect_id": allDefects[currentDefectIndex]['pk'], "values": values};
+            let data = {
+                "isEdit": true,
+                "defect_id": allDefects.current[currentDefectIndex.current]['pk'],
+                "values": values
+            };
             request({
                 method: 'post',
                 url: 'add_defect/',
@@ -264,55 +306,92 @@ const DefectDetection = () => {
         };
 
         const previousDefect = () => {
-            if (allDefects.length < 2) return;
-            let index = currentDefectIndex - 1;
-            if (currentDefectIndex - 1 === -1) {
-                setCurrentDefectIndex(allDefects.length - 1);
-                index = allDefects.length - 1;
+            if (allDefects.current.length < 2) return;
+            if (currentDefectIndex.current - 1 === -1) {
+                currentDefectIndex.current = allDefects.current.length - 1;
             } else {
-                setCurrentDefectIndex(currentDefectIndex - 1);
+                currentDefectIndex.current = currentDefectIndex.current - 1;
             }
-            form.setFieldsValue({
-                time_in_video: allDefects[index]['fields']['time_in_video'],
-                defect_type_id: allDefects[index]['fields']['defect_type_id'],
-                defect_distance: allDefects[index]['fields']['defect_distance'],
-                defect_length: allDefects[index]['fields']['defect_length'],
-                clock_start: allDefects[index]['fields']['clock_start'],
-                clock_end: allDefects[index]['fields']['clock_end'],
-                defect_date: allDefects[index]['fields']['defect_date'],
-                defect_attribute: allDefects[index]['fields']['defect_attribute'],
-                defect_remark: allDefects[index]['fields']['defect_remark'],
-            });
-            //填入缺陷级别
-            onChangeDefectType({'defect_grade_id': allDefects[index]['fields']['defect_grade_id']});
+            setCurrentDefect();
+            isDragSlider.current = false;//防止设置进度条时触发onSeeking
+            videoRef.current.currentTime = timeToSeconds(allDefects.current[currentDefectIndex.current]['fields']['time_in_video']);
         };
 
         const nextDefect = () => {
-            if (allDefects.length < 2) return;
-            let index = currentDefectIndex + 1;
-            if (currentDefectIndex + 1 === allDefects.length) {
-                setCurrentDefectIndex(0);
-                index = 0;
+            if (allDefects.current.length < 2) return;
+            if (currentDefectIndex.current + 1 === allDefects.current.length) {
+                currentDefectIndex.current = 0;
             } else {
-                setCurrentDefectIndex(currentDefectIndex + 1);
+                currentDefectIndex.current = currentDefectIndex.current + 1;
             }
-            form.setFieldsValue({
-                time_in_video: allDefects[index]['fields']['time_in_video'],
-                defect_type_id: allDefects[index]['fields']['defect_type_id'],
-                defect_distance: allDefects[index]['fields']['defect_distance'],
-                defect_length: allDefects[index]['fields']['defect_length'],
-                clock_start: allDefects[index]['fields']['clock_start'],
-                clock_end: allDefects[index]['fields']['clock_end'],
-                defect_date: allDefects[index]['fields']['defect_date'],
-                defect_attribute: allDefects[index]['fields']['defect_attribute'],
-                defect_remark: allDefects[index]['fields']['defect_remark'],
-            });
-            //填入缺陷级别
-            onChangeDefectType({'defect_grade_id': allDefects[index]['fields']['defect_grade_id']});
+            setCurrentDefect();
+            isDragSlider.current = false;//防止设置进度条时触发onSeeking
+            videoRef.current.currentTime = timeToSeconds(allDefects.current[currentDefectIndex.current]['fields']['time_in_video']);
         };
 
         const handleAdd = () => {
+            let seconds = parseInt(videoRef.current.currentTime);
+            let timeInVideo = new Date(seconds * 1000).toISOString().substr(11, 8);//seconds to hh:mm:ss
+            for (let i = 0; i < allDefects.current.length; i++) {
+                if (allDefects.current[i]['fields']['time_in_video'].includes(timeInVideo)) {
+                    message.warn('此处已标记', 3);
+                    return;
+                }
+            }
+            videoRef.current.pause();
+            let values = {
+                "video_id": location.state.video_id,
+                "defect_type_id": 1,//默认值
+                "defect_grade_id": 1,
+                "time_in_video": timeInVideo,
+                "defect_date": moment().format("YYYY-MM-DD HH:mm:ss"),
+                "defect_distance": 0,
+                "defect_length": 0,
+                "clock_start": 1,
+                "clock_end": 1,
+                "defect_attribute": "",
+                "defect_remark": ""
+            };
+            let data = {"isEdit": false, "values": values};
+            request({
+                method: 'post',
+                url: 'add_defect/',
+                data: data,
+            }).then(function (response) {
+                if (response.data.code === 0) {
+                    let pk = response.data.pk;
+                    //找到该缺陷插入位置
+                    let last = true;//是否是插到最后
+                    let newDefects = [];
+                    for (let i = 0; i < allDefects.current.length; i++) {
+                        if (last && timeToSeconds(allDefects.current[i]['fields']['time_in_video']) > seconds) {
+                            currentDefectIndex.current = i;
+                            last = false;
+                            newDefects.push({"pk": pk, "fields": values})
+                        }
+                        newDefects.push(allDefects.current[i])
+                    }
+                    if (last) {
+                        currentDefectIndex.current = allDefects.current.length;
+                        newDefects.push({"pk": pk, "fields": values});
+                    }
+                    allDefects.current = newDefects;
+                    getAllDefects();
+                    message.success('添加成功', 3);
+                } else {
+                    message.error('添加失败1' + response.data.msg, 3)
+                }
+            }).catch(function (error) {
+                message.error('添加失败2' + error);
+            });
+        };
 
+        //hh:mm:ss to seconds
+        const timeToSeconds = (value) => {
+            let hour = parseInt(value.substr(0, 2));
+            let minute = parseInt(value.substr(3, 2));
+            let second = parseInt(value.substr(6, 2));
+            return hour * 60 * 60 + minute * 60 + second;
         };
 
         const onChangePlayback = (value) => {
@@ -321,20 +400,41 @@ const DefectDetection = () => {
 
         return (
             <Card style={{marginTop: "-5%"}}>
-                <Affix offsetTop={150} style={{float: "left", width: "60%", height: "100%"}}>
+                <Affix offsetTop={120} style={{float: "left", width: "60%", height: "100%"}}>
                     <Row>
                         {myVideo}
                     </Row>
-                    <Row gutter={30}>
+                    <Slider dots={false}
+                            tooltipVisible={false}
+                            marks={marks}
+                            style={{width: "90%", marginTop: "1%", marginLeft: "0"}}
+                            trackStyle={{
+                                height: '6px',
+                                borderRadius: '10px',
+                                background: '#64b4ff'
+                            }}
+                            railStyle={{
+                                height: '6px',
+                                borderRadius: '6px',
+                            }}
+                            handleStyle={{
+                                borderColor: "#00000000",//隐藏handle
+                                width: '0',
+                                height: '0',
+                                top: '-100vh'
+                            }}
+                            value={100}
+                    />
+                    <Row gutter={30} style={{marginTop: "0"}}>
                         <Col>
                             <Select onChange={onChangePlayback} defaultValue={1} style={{width: 100}}
                                     getPopupContainer={triggerNode => triggerNode.parentElement} //展开框相对父元素固定，否则affix下会select不动展开框动
                             >
-                                <Option value={0.5}>0.5</Option>
-                                <Option value={1}>1.0</Option>
-                                <Option value={2}>1.5</Option>
-                                <Option value={2.5}>2.0</Option>
-                                <Option value={3}>3.0</Option>
+                                <Option value={0.5}>倍速x0.5</Option>
+                                <Option value={1}>倍速x1.0</Option>
+                                <Option value={2}>倍速x1.5</Option>
+                                <Option value={2.5}>倍速x2.0</Option>
+                                <Option value={3}>倍速x3.0</Option>
                             </Select>
                         </Col>
                     </Row>
@@ -432,7 +532,7 @@ const DefectDetection = () => {
                                 <Input disabled={true}/>
                             </Form.Item>
                             <Form.Item label="缺陷性质" name="defect_attribute">
-                                <Input/>
+                                <Input disabled={true}/>
                             </Form.Item>
                             <Form.Item label="备注" name="defect_remark">
                                 <Input.TextArea autoSize={{minRows: 1}}/>

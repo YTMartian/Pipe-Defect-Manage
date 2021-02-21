@@ -1,5 +1,5 @@
 from django.db import models
-from django.db.models import IntegerField, FloatField, DateField, ForeignKey, CharField, DateTimeField
+from django.db.models import IntegerField, FloatField, AutoField, ForeignKey, CharField, DateTimeField
 from django.core.validators import MaxValueValidator, MinValueValidator
 
 
@@ -52,6 +52,7 @@ class Project(models.Model):
     drainage = CharField(default='', max_length=50)
     dredging = CharField(default='', max_length=50)
     detection_equipment = CharField(default='', max_length=50)
+    detection_method = CharField(default='', max_length=50)
 
 
 class Line(models.Model):
@@ -59,6 +60,8 @@ class Line(models.Model):
     project_id = ForeignKey(to=Project, on_delete=models.CASCADE)
     regional_importance_id = ForeignKey(to=Regional, on_delete=models.CASCADE)
     soil_id = ForeignKey(to=Soil, on_delete=models.CASCADE)
+    total_length = FloatField(default=0)
+    detection_length = FloatField(default=0)
     start_number = CharField(default='', max_length=50)
     end_number = CharField(default='', max_length=50)
     start_height = FloatField(default=0)
@@ -70,6 +73,7 @@ class Line(models.Model):
     end_x_coordinate = FloatField(default=0)
     end_y_coordinate = FloatField(default=0)
     flow_direction = IntegerField(default=0, validators=[MaxValueValidator(1), MinValueValidator(0)])
+    type = CharField(default='', max_length=50)
     sub_level_type = CharField(default='', max_length=50)
     material = CharField(default='', max_length=50)
     burial_way = CharField(default='', max_length=50)
@@ -119,7 +123,8 @@ class Video(models.Model):
 
 
 class Defect(models.Model):
-    defect_id = IntegerField(primary_key=True, auto_created=True)
+    # 使用AutoField，这样保存模型后能直接获得主键
+    defect_id = AutoField(primary_key=True, auto_created=True)
     video_id = ForeignKey(to=Video, on_delete=models.CASCADE)
     time_in_video = CharField(default='', max_length=50)
     defect_type_id = ForeignKey(to=DefectType, on_delete=models.CASCADE)

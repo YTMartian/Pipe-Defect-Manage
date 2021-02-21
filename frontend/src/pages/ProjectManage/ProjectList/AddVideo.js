@@ -88,7 +88,7 @@ const AddVideo = () => {
                     message.error('获取管线失败1' + response.data.msg, 3)
                 }
             }).catch(function (error) {
-                message.error('获取管线失败2'+error, 3);
+                message.error('获取管线失败2' + error, 3);
             });
             if (location.state.isEdit) {
                 request({
@@ -105,12 +105,10 @@ const AddVideo = () => {
                             name: response.data.list[0]['fields']['name'],
                             path: response.data.list[0]['fields']['path'],
                             line_id: response.data.list[0]['fields']['line_id'],
+                            import_date: response.data.list[0]['fields']['import_date'],
                         });
                         if (response.data.list[0]['fields']['record_date'].length > 0) {
                             form.setFieldsValue({record_date: moment(response.data.list[0]['fields']['record_date'], 'YYYY-MM-DD')})
-                        }
-                        if (response.data.list[0]['fields']['import_date'].length > 0) {
-                            form.setFieldsValue({import_date: moment(response.data.list[0]['fields']['import_date'], 'YYYY-MM-DD HH:mm:ss')})
                         }
                     } else {
                         message.error('获取视频失败： ' + response.data.msg, 3)
@@ -143,7 +141,10 @@ const AddVideo = () => {
                     message.success('修改成功', 3);
                 } else {
                     message.success('添加成功', 3);
-                    // history.push({state: {line_id: location.state.line_id, initialization: true}})
+                    history.push({
+                        pathname: '/ProjectManage/VideoList',
+                        state: {project_id: location.state.project_id, initialization: true}
+                    })
                 }
             } else {
                 message.error('添加失败： ' + response.data.msg, 3)

@@ -54,7 +54,7 @@ const ProjectList = () => {
                 message.error('获取失败1' + response.data.msg, 3)
             }
         }).catch(function (error) {
-            message.error('删除失败2'+ error);
+            message.error('删除失败2' + error);
         });
     };
     if (initialization) {
@@ -81,7 +81,7 @@ const ProjectList = () => {
                 message.error('删除失败1' + response.data.msg, 3)
             }
         }).catch(function (error) {
-            message.error('删除失败2'+ error);
+            message.error('删除失败2' + error);
         });
     };
 
@@ -95,10 +95,6 @@ const ProjectList = () => {
             if (data.allData[i][searchSelect].includes(value)) newData.push(data.allData[i]);
         }
         setData({currentData: newData, allData: data.allData});
-    };
-
-    const onHandleReport = project_id => {
-        message.info(project_id)
     };
 
     const onRangePickerChange = value => {
@@ -287,8 +283,8 @@ const ProjectList = () => {
             align: "center",
             render:
                 (_, record) =>
-                    // eslint-disable-next-line jsx-a11y/anchor-is-valid,no-script-url
-                    <a href="javascript:" onClick={() => onHandleReport(record.key)}>报告</a>
+                    // eslint-disable-next-line jsx-a11y/anchor-is-valid,no-script-url,react/jsx-no-target-blank
+                    <a href={`${request.defaults.baseURL}get_report/${record.key}`} target='_blank'>报告</a>
         },
     ];
     return (
