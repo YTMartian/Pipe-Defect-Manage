@@ -383,7 +383,7 @@ structure_defect_names = ['支管暗接', '变形', '错口', '异物穿入', '�
 function_defect_names = ['沉积', '残墙、坝根', '浮渣', '结垢', '树根', '障碍物']
 colors = ['00B0F0', 'FFFF00', 'FFC000', 'FF0000']
 grade = ['Ⅰ', 'Ⅱ', 'Ⅲ', 'Ⅳ']
-images_path = 'images/'  # 图片保存路径
+images_path = 'misc/images/'  # 图片保存路径
 doc = None
 
 

@@ -72,6 +72,8 @@ const DefectDetection = () => {
         const [myVideo, setMyVideo] = useState(undefined);
         const videoRef = useRef(undefined);//video别名
         let isDragSlider = useRef(true);
+        let videoSrc = useRef('');
+        let videoKey = useRef(1);
         const [marks, setMarks] = useState({});
 
         const setCurrentDefect = () => {
@@ -188,7 +190,7 @@ const DefectDetection = () => {
                         });
                         //如此一来动态更改video的src
                         //先url编码处理路径，防止\等字符造成url错误
-                        let path = request.defaults.baseURL + 'get_video_stream/' + encodeURI(response.data.list[0]['fields']['path']);
+                        videoSrc.current = request.defaults.baseURL + 'get_video_stream/' + encodeURI(response.data.list[0]['fields']['path']);
                         setMyVideo(<video
                             controls
                             ref={videoRef}
@@ -196,7 +198,7 @@ const DefectDetection = () => {
                             className='video-style'
                             onCanPlayThrough={drawMarks}//视频加载完毕
                         >
-                            <source src={path}/>
+                            <source src={videoSrc.current}/>
                         </video>);
                     }
                 }).catch(function (error) {
@@ -398,6 +400,36 @@ const DefectDetection = () => {
             videoRef.current.playbackRate = value;
         };
 
+        const handleAuto = () => {
+            videoKey.current += 1;
+            setMyVideo(
+                <video
+                    key={videoKey.current}//通过更改key才能重新加载video
+                    controls
+                    ref={videoRef}
+                    onSeeking={onSeeking}
+                    className='video-style'
+                    onCanPlayThrough={drawMarks}//视频加载完毕
+                >
+                    <source src='http://www.potatochip.cn/gaofengkuaiban.webm'/>
+                </video>);
+        };
+
+        const handleManual = () => {
+            videoKey.current += 1;
+            setMyVideo(
+                <video
+                    key={videoKey.current}//通过更改key才能重新加载video
+                    controls
+                    ref={videoRef}
+                    onSeeking={onSeeking}
+                    className='video-style'
+                    onCanPlayThrough={drawMarks}//视频加载完毕
+                >
+                    <source src={videoSrc.current}/>
+                </video>);
+        };
+
         return (
             <Card style={{marginTop: "-5%"}}>
                 <Affix offsetTop={120} style={{float: "left", width: "60%", height: "100%"}}>
@@ -425,8 +457,24 @@ const DefectDetection = () => {
                             }}
                             value={100}
                     />
-                    <Row gutter={30} style={{marginTop: "0"}}>
-                        <Col>
+                    <Row gutter={16} style={{marginTop: "0"}}>
+                        <Col span={4}>
+                            <Button
+                                onClick={handleAuto}
+                                type="primary"
+                            >
+                                自动检测
+                            </Button>
+                        </Col>
+                        <Col span={4}>
+                            <Button
+                                onClick={handleManual}
+                                type="default"
+                            >
+                                手动检测
+                            </Button>
+                        </Col>
+                        <Col span={4}>
                             <Select onChange={onChangePlayback} defaultValue={1} style={{width: 100}}
                                     getPopupContainer={triggerNode => triggerNode.parentElement} //展开框相对父元素固定，否则affix下会select不动展开框动
                             >

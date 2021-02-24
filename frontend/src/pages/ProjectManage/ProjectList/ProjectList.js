@@ -284,7 +284,8 @@ const ProjectList = () => {
             render:
                 (_, record) =>
                     // eslint-disable-next-line jsx-a11y/anchor-is-valid,no-script-url,react/jsx-no-target-blank
-                    <a href={`${request.defaults.baseURL}get_report/${record.key}`} target='_blank'>报告</a>
+                    <a href={`${request.defaults.baseURL}get_report/${record.key}`}
+                       download={record.project_name}>报告</a>//使用download，这样返回的东西都以文件下载
         },
     ];
     return (

@@ -8,4 +8,6 @@ frontend/.eslintcache
 frontend/build
 template.docx
 final.docx
-images/
+misc/
+__pycache__/
+*.spec
