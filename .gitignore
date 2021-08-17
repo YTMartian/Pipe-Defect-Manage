@@ -1,6 +1,5 @@
 .idea
 blog/migrations
-blog/unet/unet_model.h5
 blog/__pycache__
 myblog/__pycache__
 frontend/.idea
