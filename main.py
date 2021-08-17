@@ -9,10 +9,10 @@ main()里的django运行后会打开控制台，因此使用start.vbs隐式打�
 
 
 def main():
-    # 运行django.
-    server_process = subprocess.Popen('python ./manage.py runserver 127.0.0.1:8000')
+    # 运行打包后的django.
+    server_process = subprocess.Popen('./manage/manage.exe runserver 127.0.0.1:4399')
     # 运行electron打包的react.
-    browser_process = subprocess.Popen('./frontend/build/release/browser-win32-x64/browser.exe')
+    browser_process = subprocess.Popen('./browser-win32-x64/browser.exe')
     # 如果关闭了browser，则关闭服务器
     while True:
         # 获取进程状态，None表示还在运行.
@@ -25,6 +25,12 @@ def main():
             break
         time.sleep(3)
 
+#如果pyinstaller -w,则无法运行subprocess，因为其要显式处理stdin,stdout等
+def myRun(cmd):
+    startupinfo = subprocess.STARTUPINFO()
+    startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+    process = subprocess.run(cmd, startupinfo=startupinfo, stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE)
+    return process.stdout
 
 def main2():
     server_process = subprocess.Popen(['cscript.exe', "start.vbs"])
@@ -34,11 +40,17 @@ def main2():
         poll = browser_process.poll()
         if poll is not None:
             # 杀掉所有python程序
-            result = os.popen('tasklist | findstr python').read()
-            pids = [int(line.split()[1]) for line in result.splitlines()]
+            result = str(myRun('tasklist'))
+            result = result.split('\\n')
+            res = []
+            for i in result:
+                if 'manage' in i:
+                    res.append(i)
+            # result = os.popen('tasklist | findstr manage').read()
+            pids = [int(line.split()[1]) for line in res]
             for pid in pids:
                 try:
-                    os.popen('taskkill /pid {} /f'.format(pid))
+                    myRun('taskkill /pid {} /f'.format(pid))
                 except:
                     pass
             server_process.kill()

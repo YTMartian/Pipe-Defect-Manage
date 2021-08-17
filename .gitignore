@@ -10,4 +10,7 @@ template.docx
 final.docx
 misc/
 __pycache__/
+python/
 *.spec
+dist/
+build/

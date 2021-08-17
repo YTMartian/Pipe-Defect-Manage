@@ -16,7 +16,7 @@ import {ConfigProvider} from "antd";//全局中文
 React.icons = icons;
 
 ReactDOM.render(
-    <Provider store={store} style={{size:"120%"}}>
+    <Provider store={store}>
         <ConfigProvider locale={zhCN}>
             <App/>
         </ConfigProvider>

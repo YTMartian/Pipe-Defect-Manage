@@ -17,6 +17,8 @@ import {
     Col,
     Popconfirm,
     Slider,
+    Modal,
+    Progress
 } from 'antd'
 
 import {CaretLeftFilled, CaretRightFilled} from '@ant-design/icons';
@@ -73,8 +75,10 @@ const DefectDetection = () => {
         const videoRef = useRef(undefined);//video别名
         let isDragSlider = useRef(true);
         let videoSrc = useRef('');
-        let videoKey = useRef(1);
+        // let videoKey = useRef(1);
+        let [progress, setProgress] = useState(0);
         const [marks, setMarks] = useState({});
+        const [isModalVisible, setIsModalVisible] = useState(false);
 
         const setCurrentDefect = () => {
             let index = currentDefectIndex.current;
@@ -196,6 +200,9 @@ const DefectDetection = () => {
                             ref={videoRef}
                             onSeeking={onSeeking}
                             className='video-style'
+                            onChange={() => {
+                                console.log('fuck')
+                            }}
                             onCanPlayThrough={drawMarks}//视频加载完毕
                         >
                             <source src={videoSrc.current}/>
@@ -401,36 +408,80 @@ const DefectDetection = () => {
         };
 
         const handleAuto = () => {
-            videoKey.current += 1;
-            setMyVideo(
-                <video
-                    key={videoKey.current}//通过更改key才能重新加载video
-                    controls
-                    ref={videoRef}
-                    onSeeking={onSeeking}
-                    className='video-style'
-                    onCanPlayThrough={drawMarks}//视频加载完毕
-                >
-                    <source src='http://www.potatochip.cn/gaofengkuaiban.webm'/>
-                </video>);
+            videoRef.current.pause();
+            setIsModalVisible(true);
+            setProgress(0);
+            //setInterval 每隔一段时间执行
+            let getProgress = setInterval(() => {
+                request({
+                    method: 'get',
+                    url: 'get_progress/',
+                }).then(function (response) {
+                    if (response.data.code === 0) {
+                        setProgress(response.data.progress);
+                    } else {
+                        // message.error('获取进度失败1' + response.data.msg, 3)
+                    }
+                }).catch(function (error) {
+                    // message.error('获取进度失败2' + error);
+                });
+            }, 3000);
+            request({
+                method: 'post',
+                url: 'auto_detection/',
+                data: {'video_id': location.state.video_id},
+                timeout: 10 * 60 * 1000,
+            }).then(function (response) {
+                setIsModalVisible(false);
+                clearInterval(getProgress);//停止执行
+                if (response.data.code === 0) {
+                    currentDefectIndex.current = -1;
+                    allDefects.current = [];
+                    getAllDefects();
+                    message.success("检测成功！", 3);
+                } else if (response.data.code === 2) {//取消检测
+
+                } else {
+                    message.error('检测失败1' + response.data.msg, 3);
+                }
+            }).catch(function (error) {
+                setIsModalVisible(false);
+                message.error('检测失败2' + error);
+            });
         };
 
-        const handleManual = () => {
-            videoKey.current += 1;
-            setMyVideo(
-                <video
-                    key={videoKey.current}//通过更改key才能重新加载video
-                    controls
-                    ref={videoRef}
-                    onSeeking={onSeeking}
-                    className='video-style'
-                    onCanPlayThrough={drawMarks}//视频加载完毕
-                >
-                    <source src={videoSrc.current}/>
-                </video>);
+        const cancelAuto = () => {
+            request({
+                method: 'get',
+                url: 'cancel_auto_detection/',
+            }).then(function (response) {
+                if (response.data.code === 0) {
+                    setIsModalVisible(false);
+                } else {
+                    message.error('取消失败1' + response.data.msg, 3)
+                }
+            }).catch(function (error) {
+                message.error('取消失败2' + error);
+            });
         };
+
+        // const handleManual = () => {
+        //     videoKey.current += 1;
+        //     setMyVideo(
+        //         <video
+        //             key={videoKey.current}//通过更改key才能重新加载video
+        //             controls
+        //             ref={videoRef}
+        //             onSeeking={onSeeking}
+        //             className='video-style'
+        //             onCanPlayThrough={drawMarks}//视频加载完毕
+        //         >
+        //             <source src={videoSrc.current}/>
+        //         </video>);
+        // };
 
         return (
+
             <Card style={{marginTop: "-5%"}}>
                 <Affix offsetTop={120} style={{float: "left", width: "60%", height: "100%"}}>
                     <Row>
@@ -466,14 +517,14 @@ const DefectDetection = () => {
                                 自动检测
                             </Button>
                         </Col>
-                        <Col span={4}>
-                            <Button
-                                onClick={handleManual}
-                                type="default"
-                            >
-                                手动检测
-                            </Button>
-                        </Col>
+                        {/*<Col span={4}>*/}
+                        {/*    <Button*/}
+                        {/*        onClick={handleManual}*/}
+                        {/*        type="default"*/}
+                        {/*    >*/}
+                        {/*        手动检测*/}
+                        {/*    </Button>*/}
+                        {/*</Col>*/}
                         <Col span={4}>
                             <Select onChange={onChangePlayback} defaultValue={1} style={{width: 100}}
                                     getPopupContainer={triggerNode => triggerNode.parentElement} //展开框相对父元素固定，否则affix下会select不动展开框动
@@ -591,6 +642,12 @@ const DefectDetection = () => {
                                 </Button>
                             </Form.Item>
                         </Form>
+                        <Modal visible={isModalVisible} footer={null} width={200} centered closable={false}>
+                            {/*<Spin tip="处理中..." style={{marginLeft: "35%"}}/>*/}
+                            <Progress type="circle" percent={progress} style={{marginLeft: "10%"}}/>
+                            <Button shape="round" onClick={cancelAuto}
+                                    style={{marginLeft: "28%", marginTop: "10%"}}>取消</Button>
+                        </Modal>
                     </Card>
                 </div>
             </Card>
