@@ -13,3 +13,5 @@
 start.bat and start.vbs: to run django and hide CMD black window.
 
 manage.spec: pyinstaller manage.spec
+
+generate react exe: [frontend/electron/readme.md](frontend/electron/readme.md)
