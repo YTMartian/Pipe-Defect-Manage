@@ -3,7 +3,8 @@ from django.http import JsonResponse, FileResponse, Http404
 from django.views.decorators.csrf import csrf_exempt
 from docxtpl import DocxTemplate, InlineImage
 import matplotlib
-matplotlib.use('Agg') #解决pyinstaller打包后 Starting a Matplotlib GUI outside of the main thread will likely fail. 
+
+matplotlib.use('Agg')  # 解决pyinstaller打包后 Starting a Matplotlib GUI outside of the main thread will likely fail.
 from matplotlib import font_manager as fm
 from django.core import serializers
 import matplotlib.pyplot as plt
@@ -22,6 +23,7 @@ import cv2
 from keras import backend as K
 from .unet.unet import unet_F_B_A
 from .unet.data_loader import get_image_array
+
 os.environ['CUDA_VISIBLE_DEVICES'] = '/gpu:0'
 
 '''
@@ -29,9 +31,7 @@ auto update content table:https://blog.csdn.net/weixin_42670653/article/details/
 '''
 
 font = {
-    'family': 'SimHei',
-    'weight': 'bold',
-    'size': 12
+    'family': 'SimHei', 'weight': 'bold', 'size': 12
 }
 matplotlib.rc("font", **font)
 
@@ -43,13 +43,14 @@ def add_project(request):
     try:
         data = json.loads(request.body.decode('utf-8'))
         if data['isEdit']:
-            models.Project.objects.filter(project_id=data['project_id']).update(**data['values'])
+            models.Project.objects.filter(project_id = data['project_id']).update(**data['values'])
         else:
             models.Project.objects.create(**data['values'])
         res['msg'] = 'success'
         res['code'] = 0
     except Exception as e:
-        res['msg'] = str(e)
+        error_line = e.__traceback__.tb_lineno  # 出错行数
+        res['msg'] = str(repr(e)) + ' line({})'.format(error_line)
         res['code'] = 1
     return JsonResponse(res)
 
@@ -65,12 +66,13 @@ def get_project(request):
             projects = models.Project.objects.all()
             projects = reversed(projects)
         elif data['condition'] == 'project_id':
-            projects = models.Project.objects.filter(project_id=data['project_id'])
+            projects = models.Project.objects.filter(project_id = data['project_id'])
         res['list'] = json.loads(serializers.serialize('json', projects))
         res['msg'] = 'success'
         res['code'] = 0
     except Exception as e:
-        res['msg'] = str(e)
+        error_line = e.__traceback__.tb_lineno  # 出错行数
+        res['msg'] = str(repr(e)) + ' line({})'.format(error_line)
         res['code'] = 1
     return JsonResponse(res)
 
@@ -82,11 +84,12 @@ def delete_project(request):
     try:
         data = json.loads(request.body.decode('utf-8'))
         for project_id in data['project_ids']:
-            models.Project.objects.filter(project_id=project_id).delete()
+            models.Project.objects.filter(project_id = project_id).delete()
         res['msg'] = 'success'
         res['code'] = 0
     except Exception as e:
-        res['msg'] = str(e)
+        error_line = e.__traceback__.tb_lineno  # 出错行数
+        res['msg'] = str(repr(e)) + ' line({})'.format(error_line)
         res['code'] = 1
     return JsonResponse(res)
 
@@ -99,15 +102,16 @@ def get_line(request):
         data = json.loads(request.body.decode('utf-8'))
         lines = None
         if data['condition'] == 'all':
-            lines = models.Line.objects.filter(project_id=data['project_id'])
+            lines = models.Line.objects.filter(project_id = data['project_id'])
             lines = reversed(lines)
         elif data['condition'] == 'line_id':
-            lines = models.Line.objects.filter(line_id=data['line_id'])
+            lines = models.Line.objects.filter(line_id = data['line_id'])
         res['list'] = json.loads(serializers.serialize('json', lines))
         res['msg'] = 'success'
         res['code'] = 0
     except Exception as e:
-        res['msg'] = str(e)
+        error_line = e.__traceback__.tb_lineno  # 出错行数
+        res['msg'] = str(repr(e)) + ' line({})'.format(error_line)
         res['code'] = 1
     return JsonResponse(res)
 
@@ -119,11 +123,12 @@ def delete_line(request):
     try:
         data = json.loads(request.body.decode('utf-8'))
         for line_id in data['line_ids']:
-            models.Line.objects.filter(line_id=line_id).delete()
+            models.Line.objects.filter(line_id = line_id).delete()
         res['msg'] = 'success'
         res['code'] = 0
     except Exception as e:
-        res['msg'] = str(e)
+        error_line = e.__traceback__.tb_lineno  # 出错行数
+        res['msg'] = str(repr(e)) + ' line({})'.format(error_line)
         res['code'] = 1
     return JsonResponse(res)
 
@@ -135,18 +140,19 @@ def add_line(request):
     try:
         data = json.loads(request.body.decode('utf-8'))
         if data['isEdit']:
-            models.Line.objects.filter(line_id=data['line_id']).update(**data['values'])
+            models.Line.objects.filter(line_id = data['line_id']).update(**data['values'])
         else:
             # 插入带外键数据，先要获取外键对象
-            data['values']['project_id'] = models.Project.objects.get(project_id=data['project_id'])
+            data['values']['project_id'] = models.Project.objects.get(project_id = data['project_id'])
             data['values']['regional_importance_id'] = models.Regional.objects.get(
-                regional_id=data['values']['regional_importance_id'])
-            data['values']['soil_id'] = models.Soil.objects.get(soil_id=data['values']['soil_id'])
+                    regional_id = data['values']['regional_importance_id'])
+            data['values']['soil_id'] = models.Soil.objects.get(soil_id = data['values']['soil_id'])
             models.Line.objects.create(**data['values'])
         res['msg'] = 'success'
         res['code'] = 0
     except Exception as e:
-        res['msg'] = str(e)
+        error_line = e.__traceback__.tb_lineno  # 出错行数
+        res['msg'] = str(repr(e)) + ' line({})'.format(error_line)
         res['code'] = 1
     return JsonResponse(res)
 
@@ -159,15 +165,16 @@ def get_point(request):
         data = json.loads(request.body.decode('utf-8'))
         points = None
         if data['condition'] == 'all':
-            points = models.Point.objects.filter(line_id=data['line_id'])
+            points = models.Point.objects.filter(line_id = data['line_id'])
             points = reversed(points)
         elif data['condition'] == 'point_id':
-            points = models.Point.objects.filter(point_id=data['point_id'])
+            points = models.Point.objects.filter(point_id = data['point_id'])
         res['list'] = json.loads(serializers.serialize('json', points))
         res['msg'] = 'success'
         res['code'] = 0
     except Exception as e:
-        res['msg'] = str(e)
+        error_line = e.__traceback__.tb_lineno  # 出错行数
+        res['msg'] = str(repr(e)) + ' line({})'.format(error_line)
         res['code'] = 1
     return JsonResponse(res)
 
@@ -179,11 +186,12 @@ def delete_point(request):
     try:
         data = json.loads(request.body.decode('utf-8'))
         for point_id in data['point_ids']:
-            models.Point.objects.filter(point_id=point_id).delete()
+            models.Point.objects.filter(point_id = point_id).delete()
         res['msg'] = 'success'
         res['code'] = 0
     except Exception as e:
-        res['msg'] = str(e)
+        error_line = e.__traceback__.tb_lineno  # 出错行数
+        res['msg'] = str(repr(e)) + ' line({})'.format(error_line)
         res['code'] = 1
     return JsonResponse(res)
 
@@ -195,15 +203,16 @@ def add_point(request):
     try:
         data = json.loads(request.body.decode('utf-8'))
         if data['isEdit']:
-            models.Point.objects.filter(point_id=data['point_id']).update(**data['values'])
+            models.Point.objects.filter(point_id = data['point_id']).update(**data['values'])
         else:
             # 插入带外键数据，先要获取外键对象
-            data['values']['line_id'] = models.Line.objects.get(line_id=data['line_id'])
+            data['values']['line_id'] = models.Line.objects.get(line_id = data['line_id'])
             models.Point.objects.create(**data['values'])
         res['msg'] = 'success'
         res['code'] = 0
     except Exception as e:
-        res['msg'] = str(e)
+        error_line = e.__traceback__.tb_lineno  # 出错行数
+        res['msg'] = str(repr(e)) + ' line({})'.format(error_line)
         res['code'] = 1
     return JsonResponse(res)
 
@@ -216,15 +225,16 @@ def get_video(request):
         data = json.loads(request.body.decode('utf-8'))
         videos = None
         if data['condition'] == 'all':
-            videos = models.Video.objects.filter(project_id=data['project_id'])
+            videos = models.Video.objects.filter(project_id = data['project_id'])
             videos = reversed(videos)
         elif data['condition'] == 'video_id':
-            videos = models.Video.objects.filter(video_id=data['video_id'])
+            videos = models.Video.objects.filter(video_id = data['video_id'])
         res['list'] = json.loads(serializers.serialize('json', videos))
         res['msg'] = 'success'
         res['code'] = 0
     except Exception as e:
-        res['msg'] = str(e)
+        error_line = e.__traceback__.tb_lineno  # 出错行数
+        res['msg'] = str(repr(e)) + ' line({})'.format(error_line)
         res['code'] = 1
     return JsonResponse(res)
 
@@ -236,11 +246,12 @@ def delete_video(request):
     try:
         data = json.loads(request.body.decode('utf-8'))
         for video_id in data['video_ids']:
-            models.Video.objects.filter(video_id=video_id).delete()
+            models.Video.objects.filter(video_id = video_id).delete()
         res['msg'] = 'success'
         res['code'] = 0
     except Exception as e:
-        res['msg'] = str(e)
+        error_line = e.__traceback__.tb_lineno  # 出错行数
+        res['msg'] = str(repr(e)) + ' line({})'.format(error_line)
         res['code'] = 1
     return JsonResponse(res)
 
@@ -252,16 +263,31 @@ def add_video(request):
     try:
         data = json.loads(request.body.decode('utf-8'))
         if data['isEdit']:
-            models.Video.objects.filter(video_id=data['video_id']).update(**data['values'])
+            models.Video.objects.filter(video_id = data['video_id']).update(**data['values'])
         else:
             # 插入带外键数据，先要获取外键对象
-            data['values']['project_id'] = models.Project.objects.get(project_id=data['project_id'])
-            data['values']['line_id'] = models.Line.objects.get(line_id=data['values']['line_id'])
-            models.Video.objects.create(**data['values'])
+            data['values']['project_id'] = models.Project.objects.get(project_id = data['project_id'])
+            data['values']['line_id'] = models.Line.objects.get(line_id = data['values']['line_id'])
+            paths = data['values']['path'].split('?')
+            names = data['values']['name'].split('?')
+            if len(paths) != len(names):
+                res['msg'] = '视频文件名与视频路径数目不符合'
+                res['code'] = 1
+                return JsonResponse(res)
+            for i in range(len(paths)):
+                try:
+                    data['values']['path'] = paths[i]
+                    data['values']['name'] = names[i]
+                    models.Video.objects.create(**data['values'])
+                except Exception as e:
+                    res['msg'] = str(repr(e)) + '(添加视频{}失败)'.format(names[i])
+                    res['code'] = 1
+                    return JsonResponse(res)
         res['msg'] = 'success'
         res['code'] = 0
     except Exception as e:
-        res['msg'] = str(e)
+        error_line = e.__traceback__.tb_lineno  # 出错行数
+        res['msg'] = str(repr(e)) + ' line({})'.format(error_line)
         res['code'] = 1
     return JsonResponse(res)
 
@@ -274,16 +300,17 @@ def get_video_stream(request, path):
         # path = r'F:\ice_video_20210122-140208.mp4'
         # path = r'F:\1.mp4'
         # path = r'F:\gaofengkuaiban.webm'
-
+        
         data = open(path, 'rb')
-        response = FileResponse(data, content_type='video/mp4')
+        response = FileResponse(data, content_type = 'video/mp4')
         # headers添加几个内容，否则无法拖动视频滚动条
         response['Content-Transfer-Encoding'] = 'binary'
         response['Accept-Ranges'] = 'bytes'
         response['Content-Range'] = ''
         return response
     except Exception as e:
-        print(e)
+        error_line = e.__traceback__.tb_lineno  # 出错行数
+        print(str(e) + ' line({})'.format(error_line))
         raise Http404
 
 
@@ -293,12 +320,13 @@ def get_defect_grade(request):
     res = {}
     try:
         data = json.loads(request.body.decode('utf-8'))
-        defect_grades = models.DefectGrade.objects.filter(defect_type_id=data['defect_type_id'])
+        defect_grades = models.DefectGrade.objects.filter(defect_type_id = data['defect_type_id'])
         res['list'] = json.loads(serializers.serialize('json', defect_grades))
         res['msg'] = 'success'
         res['code'] = 0
     except Exception as e:
-        res['msg'] = str(e)
+        error_line = e.__traceback__.tb_lineno  # 出错行数
+        res['msg'] = str(repr(e)) + ' line({})'.format(error_line)
         res['code'] = 1
     return JsonResponse(res)
 
@@ -311,15 +339,15 @@ def get_defect(request):
         data = json.loads(request.body.decode('utf-8'))
         defects = None
         if data['condition'] == 'all':
-            defects = models.Defect.objects.filter(video_id=data['video_id'])
-            # defects = reversed(defects)
+            defects = models.Defect.objects.filter(video_id = data['video_id'])  # defects = reversed(defects)
         elif data['condition'] == 'defect_id':
-            defects = models.Defect.objects.filter(defect_id=data['defect_id'])
+            defects = models.Defect.objects.filter(defect_id = data['defect_id'])
         res['list'] = json.loads(serializers.serialize('json', defects))
         res['msg'] = 'success'
         res['code'] = 0
     except Exception as e:
-        res['msg'] = str(e)
+        error_line = e.__traceback__.tb_lineno  # 出错行数
+        res['msg'] = str(repr(e)) + ' line({})'.format(error_line)
         res['code'] = 1
     return JsonResponse(res)
 
@@ -331,11 +359,12 @@ def delete_defect(request):
     try:
         data = json.loads(request.body.decode('utf-8'))
         for defect_id in data['defect_ids']:
-            models.Defect.objects.filter(defect_id=defect_id).delete()
+            models.Defect.objects.filter(defect_id = defect_id).delete()
         res['msg'] = 'success'
         res['code'] = 0
     except Exception as e:
-        res['msg'] = str(e)
+        error_line = e.__traceback__.tb_lineno  # 出错行数
+        res['msg'] = str(repr(e)) + ' line({})'.format(error_line)
         res['code'] = 1
     return JsonResponse(res)
 
@@ -347,20 +376,21 @@ def add_defect(request):
     try:
         data = json.loads(request.body.decode('utf-8'))
         if data['isEdit']:
-            models.Defect.objects.filter(defect_id=data['defect_id']).update(**data['values'])
+            models.Defect.objects.filter(defect_id = data['defect_id']).update(**data['values'])
         else:
             # 插入带外键数据，先要获取外键对象
-            data['values']['video_id'] = models.Video.objects.get(video_id=data['values']['video_id'])
+            data['values']['video_id'] = models.Video.objects.get(video_id = data['values']['video_id'])
             data['values']['defect_type_id'] = models.DefectType.objects.get(
-                defect_type_id=data['values']['defect_type_id'])
+                    defect_type_id = data['values']['defect_type_id'])
             data['values']['defect_grade_id'] = models.DefectGrade.objects.get(
-                defect_grade_id=data['values']['defect_grade_id'])
+                    defect_grade_id = data['values']['defect_grade_id'])
             a = models.Defect.objects.create(**data['values'])
             res['pk'] = a.pk
         res['msg'] = 'success'
         res['code'] = 0
     except Exception as e:
-        res['msg'] = str(e)
+        error_line = e.__traceback__.tb_lineno  # 出错行数
+        res['msg'] = str(repr(e)) + ' line({})'.format(error_line)
         res['code'] = 1
     return JsonResponse(res)
 
@@ -392,7 +422,7 @@ def auto_detection(request):
     try:
         cancel_auto = False
         data = json.loads(request.body.decode('utf-8'))
-        video = models.Video.objects.filter(video_id=data['video_id'])[0]
+        video = models.Video.objects.filter(video_id = data['video_id'])[0]
         cap = cv2.VideoCapture()
         cap.open(video.path)
         fps = int(cap.get(cv2.CAP_PROP_FPS))
@@ -400,7 +430,7 @@ def auto_detection(request):
         interval = 5  # 间隔5秒
         count = fps * interval
         ans = []  # 记录所有缺陷
-        model = unet_F_B_A(n_classes, input_height=input_height, input_width=input_width)
+        model = unet_F_B_A(n_classes, input_height = input_height, input_width = input_width)
         model.load_weights('blog/unet/unet_model.h5')
         defect_type_id = [1, 4, 10, 13]  # 对应的缺陷类别id  暗接，错口，破裂，渗漏
         defect_grade_id = [1, 12, 33, 45]  # 对应的第一个缺陷级别id
@@ -408,12 +438,11 @@ def auto_detection(request):
             cap.set(cv2.CAP_PROP_POS_FRAMES, count)
             flag, img = cap.read()
             if flag:
-                x = get_image_array(img, input_width, input_height,
-                                    ordering=IMAGE_ORDERING)
+                x = get_image_array(img, input_width, input_height, ordering = IMAGE_ORDERING)
                 pr = model.predict(np.array([x]))[0]
                 pr = pr.reshape((output_height, output_width, n_classes)).argmax(
-                    axis=2)  # shape=(input_height,input_width)
-
+                        axis = 2)  # shape=(input_height,input_width)
+                
                 # 统计各个值的个数
                 total = output_height * output_width
                 mask = np.unique(pr)  # [0,1,2,3,4]
@@ -428,9 +457,11 @@ def auto_detection(request):
                         index = i
                         max_ = temp[i]
                 if index != 0:  # 存在缺陷
-                    t = {'video_id': models.Video.objects.get(video_id=data['video_id']),
-                         'defect_type_id': models.DefectType.objects.get(defect_type_id=defect_type_id[index]),
-                         'defect_grade_id': models.DefectGrade.objects.get(defect_grade_id=defect_grade_id[index])}
+                    t = {
+                        'video_id'       : models.Video.objects.get(video_id = data['video_id']),
+                        'defect_type_id' : models.DefectType.objects.get(defect_type_id = defect_type_id[index - 1]),
+                        'defect_grade_id': models.DefectGrade.objects.get(defect_grade_id = defect_grade_id[index - 1])
+                    }
                     seconds = int(count / fps)
                     hour = int(seconds / 3600)
                     seconds -= hour * 3600
@@ -447,7 +478,7 @@ def auto_detection(request):
             in_auto = False
             cancel_auto = False
             return JsonResponse({'msg': 'cancel', 'code': 2})
-        models.Defect.objects.filter(video_id=data['video_id']).delete()  # 检测完毕后再删除全部缺陷
+        models.Defect.objects.filter(video_id = data['video_id']).delete()  # 检测完毕后再删除全部缺陷
         print(len(ans))
         for i in ans:
             models.Defect.objects.create(**i)
@@ -458,7 +489,8 @@ def auto_detection(request):
     except Exception as e:
         in_auto = False
         cancel_auto = False
-        res['msg'] = str(e)
+        error_line = e.__traceback__.tb_lineno  # 出错行数
+        res['msg'] = str(repr(e)) + ' line({})'.format(error_line)
         res['code'] = 1
     return JsonResponse(res)
 
@@ -486,12 +518,12 @@ def get_report(request, project_id):
         file_name = generate_report(project_id)
         time.sleep(2)
         data = open('final.docx', 'rb')
-        response = FileResponse(data,
-                                content_type='application/msword')
+        response = FileResponse(data, content_type = 'application/msword')
         response['Content-Disposition'] = f'attachment; filename={file_name}.docx'
         return response
     except Exception as e:
-        res['msg'] = str(e)
+        error_line = e.__traceback__.tb_lineno  # 出错行数
+        res['msg'] = str(repr(e)) + ' line({})'.format(error_line)
         res['code'] = 1
     return JsonResponse(res)
 
@@ -509,14 +541,11 @@ doc = None
 
 # 表5-1
 def get_pipe_defect_summary(project_id):
-    res = {'pipe_with_defect_amount': 0,
-           'pipe_with_structure_defect_amount': 0,
-           'pipe_with_function_defect_amount': 0,
-           'pipe_with_both_defect_amount': 0,
-           'pipe_without_defect_amount': 0,
-           'pipe_defects': [],
-           'defects_count': {}
-           }
+    res = {
+        'pipe_with_defect_amount'         : 0, 'pipe_with_structure_defect_amount': 0,
+        'pipe_with_function_defect_amount': 0, 'pipe_with_both_defect_amount': 0, 'pipe_without_defect_amount': 0,
+        'pipe_defects'                    : [], 'defects_count': {}
+    }
     number = 1
     for i in structure_defect_types + function_defect_types:
         for j in range(1, 5):
@@ -524,7 +553,7 @@ def get_pipe_defect_summary(project_id):
             res['defects_count']['grade' + str(j)] = 0
         res['defects_count'][i + 'total'] = 0
     res['defects_count']['grade_total'] = 0
-    lines = models.Line.objects.filter(project_id=project_id)
+    lines = models.Line.objects.filter(project_id = project_id)
     for line in lines:
         temp = {'number': number}
         number += 1
@@ -534,18 +563,17 @@ def get_pipe_defect_summary(project_id):
         temp['pipe_length'] = line.total_length
         temp['structure_defects'] = []
         temp['function_defects'] = []
-        videos = models.Video.objects.filter(line_id=line.line_id)
-        defects = [models.Defect.objects.filter(video_id=video.video_id) for video in videos]
+        videos = models.Video.objects.filter(line_id = line.line_id)
+        defects = [models.Defect.objects.filter(video_id = video.video_id) for video in videos]
         defects = [i for j in defects for i in j]  # 二维数组转一维
         flag = True
         with_structure_flag = False
         with_function_flag = False
         for defect in defects:
-            t = {'defect_distance': defect.defect_distance,
-                 'defect_grade': defect.defect_grade_id.defect_grade_name[0],
-                 'defect_type': defect.defect_type_id.defect_type_name[3:-1],
-                 'defect_length': defect.defect_length
-                 }
+            t = {
+                'defect_distance': defect.defect_distance, 'defect_grade': defect.defect_grade_id.defect_grade_name[0],
+                'defect_type'    : defect.defect_type_id.defect_type_name[3:-1], 'defect_length': defect.defect_length
+            }
             defect_type_code = defect.defect_type_id.defect_type_name[0:2]
             res['defects_count'][defect_type_code + str(t['defect_grade'])] += 1
             res['defects_count'][defect_type_code + 'total'] += 1
@@ -579,22 +607,14 @@ def get_pipes(project_id):
     global colors
     global grade
     res = []
-    lines = models.Line.objects.filter(project_id=project_id)
+    lines = models.Line.objects.filter(project_id = project_id)
     for line in lines:
         data = {
-            'pipe_no': f'{line.start_number}~{line.end_number}',
-            'pipe_diameter': line.diameter,
-            'pipe_length': line.total_length,
-            'pipe_material': line.material,
-            'detection_length': line.detection_length,
-            'structure_average_score': 0,
-            'function_average_score': 0,
-            'structure_F': 0,
-            'function_G': 0,
-            'structure_SM': 0,
-            'function_YM': 0,
-            'structure_RI': 0,
-            'function_MI': 0,
+            'pipe_no'                : f'{line.start_number}~{line.end_number}', 'pipe_diameter': line.diameter,
+            'pipe_length'            : line.total_length, 'pipe_material': line.material,
+            'detection_length'       : line.detection_length, 'structure_average_score': 0, 'function_average_score': 0,
+            'structure_F'            : 0, 'function_G': 0, 'structure_SM': 0, 'function_YM': 0, 'structure_RI': 0,
+            'function_MI'            : 0,
         }
         K = line.regional_importance_id.regional_value
         E = data['pipe_diameter']
@@ -614,8 +634,8 @@ def get_pipes(project_id):
         data['function_max_score'] = 0
         data['structure_evaluation'] = ''
         data['function_evaluation'] = ''
-        videos = models.Video.objects.filter(line_id=line.line_id)
-        defects = [models.Defect.objects.filter(video_id=video.video_id) for video in videos]
+        videos = models.Video.objects.filter(line_id = line.line_id)
+        defects = [models.Defect.objects.filter(video_id = video.video_id) for video in videos]
         defects = [i for j in defects for i in j]  # 二维数组转一维
         for defect in defects:
             if defect.defect_type_id.defect_type_name[:2] in structure_defect_types:
@@ -638,23 +658,23 @@ def get_pipes(project_id):
                     data['function_YM'] += alpha * float(defect.defect_grade_id.score) * float(defect.defect_length)
                     function_n2 += 1
                 data['function_max_score'] = max(data['function_max_score'], float(defect.defect_grade_id.score))
-
+        
         data['structure_F'] = max(data['structure_average_score'], data['structure_max_score'])
         data['function_G'] = max(data['function_average_score'], data['function_max_score'])
-
+        
         data['structure_RI'] = 0.7 * data['structure_F'] + 0.1 * K + 0.05 * E + 0.15 * T
         data['function_MI'] = 0.8 * data['function_G'] + 0.15 * K + 0.05 * E
-
+        
         if data['structure_average_score'] * float(data['pipe_length']) != 0.0:
             data['structure_SM'] /= data['structure_average_score'] * float(data['pipe_length'])
         if data['function_average_score'] * float(data['pipe_length']) != 0.0:
             data['function_YM'] /= data['function_average_score'] * float(data['pipe_length'])
-
+        
         if structure_n1 + structure_n2 > 0:
             data['structure_average_score'] /= structure_n1 + structure_n2
         if function_n1 + function_n2 > 0:
             data['function_average_score'] /= function_n1 + function_n2
-
+        
         if data['structure_SM'] < 0.1:
             data['structure_evaluation'] += '(局部缺陷)'
         elif data['structure_SM'] < 0.5:
@@ -667,7 +687,7 @@ def get_pipes(project_id):
             data['function_evaluation'] += '(部分或整体缺陷)'
         else:
             data['function_evaluation'] += '(整体缺陷)'
-
+        
         if data['structure_F'] <= 1:
             data['structure_defect_grade'] = 'Ⅰ'
             data['structure_evaluation'] += '无或有轻微缺陷，结构状况基本不受影响，但具有潜在变坏的可能。'
@@ -708,14 +728,14 @@ def get_pipes(project_id):
             data['function_evaluation'] += '根据基础数据进行全面的考虑，应尽快处理。'
         else:
             data['function_evaluation'] += '输水功能受到严重影响，应立即进行处理。'
-
+        
         data['structure_RI'] = '%.2f' % data['structure_RI']
         data['function_MI'] = '%.2f' % data['function_MI']
         data['structure_SM'] = '%.2f' % data['structure_SM']
         data['function_YM'] = '%.2f' % data['function_YM']
         data['structure_average_score'] = '%.2f' % data['structure_average_score']
         data['function_average_score'] = '%.2f' % data['function_average_score']
-
+        
         # 设置颜色
         if data['structure_defect_grade'] in grade:
             structure_color_index = grade.index(data['structure_defect_grade'])
@@ -727,7 +747,7 @@ def get_pipes(project_id):
             data['function_evaluation_color'] = colors[function_color_index]
         else:
             data['function_evaluation_color'] = 'FFFFFF'
-
+        
         res.append(data.copy())
     return res
 
@@ -742,7 +762,7 @@ def get_videos(project_id):
     time.sleep(1)
     os.mkdir(images_path)
     res = []
-    videos = models.Video.objects.filter(project_id=project_id)
+    videos = models.Video.objects.filter(project_id = project_id)
     data = {}
     for i in range(len(videos)):
         video = videos[i]
@@ -763,19 +783,16 @@ def get_videos(project_id):
         data['record_date'] = video.record_date
         data['video_remark'] = video.remark
         data['defects'] = []
-        defects = models.Defect.objects.filter(video_id=video.video_id)
+        defects = models.Defect.objects.filter(video_id = video.video_id)
         number = 0
         cap = cv2.VideoCapture()
         cap.open(video.path)
         for defect in defects:
             number += 1
             temp = {
-                'defect_distance': defect.defect_distance,
-                'defect_type': defect.defect_type_id.defect_type_name,
-                'score': defect.defect_grade_id.score,
-                'grade': defect.defect_grade_id.defect_grade_name[:2],
-                'defect_attribute': defect.defect_attribute,
-                'number': number
+                'defect_distance' : defect.defect_distance, 'defect_type': defect.defect_type_id.defect_type_name,
+                'score'           : defect.defect_grade_id.score, 'grade': defect.defect_grade_id.defect_grade_name[:2],
+                'defect_attribute': defect.defect_attribute, 'number': number
             }
             data['defects'].append(temp.copy())
             time_in_video = defect.time_in_video
@@ -789,9 +806,15 @@ def get_videos(project_id):
             cap.set(cv2.CAP_PROP_POS_FRAMES, frame)
             flag, img = cap.read()
             if not flag:
-                print('save image {}.jpg failed.'.format(video.name + '-' + seconds))
+                print('save image {}.jpg failed.'.format(str(video.name) + '-' + str(seconds)))
                 continue
-            cv2.imwrite(f'{images_path}{video.name}-{seconds}.jpg', img)
+            try:
+                # cv2.imwrite(f'{images_path}{video.name}-{seconds}.jpg', img) #不能保存中文路径
+                cv2.imencode('.jpg', img)[1].tofile(f'{images_path}{video.name}-{seconds}.jpg')
+                time.sleep(0.2)
+            except Exception as e:
+                error_line = e.__traceback__.tb_lineno  # 出错行数
+                raise Exception(str(e) + ' line({})'.format(error_line))
         cap.release()
         res.append(data.copy())
     time.sleep(1)
@@ -799,7 +822,7 @@ def get_videos(project_id):
         video = videos[i]
         res[i]['images'] = []
         temp = {}
-        defects = models.Defect.objects.filter(video_id=video.video_id)
+        defects = models.Defect.objects.filter(video_id = video.video_id)
         for j in range(0, len(defects), 2):
             time_in_video = defects[j].time_in_video
             hour = int(time_in_video[:2])
@@ -810,7 +833,7 @@ def get_videos(project_id):
             temp['left_image'] = video.name + '-' + seconds + '.jpg'
             # 向word中添加图像.
             # https://docxtpl.readthedocs.io/en/latest/
-            temp['left_image'] = InlineImage(doc, images_path + temp['left_image'], height=Mm(60))
+            temp['left_image'] = InlineImage(doc, images_path + temp['left_image'], height = Mm(60))
             if j + 1 < len(defects):
                 time_in_video = defects[j + 1].time_in_video
                 hour = int(time_in_video[:2])
@@ -819,12 +842,11 @@ def get_videos(project_id):
                 seconds = str(hour * 3600 + minute * 60 + second)
                 temp['right_number'] = f'照片{j + 2}'
                 temp['right_image'] = video.name + '-' + seconds + '.jpg'
-                temp['right_image'] = InlineImage(doc, images_path + temp['right_image'], height=Mm(60))
+                temp['right_image'] = InlineImage(doc, images_path + temp['right_image'], height = Mm(60))
             else:
                 temp['right_image'] = ''
                 temp['right_number'] = ''
-            res[i]['images'].append(temp.copy())
-        # 生成并保存报告，返回报告名
+            res[i]['images'].append(temp.copy())  # 生成并保存报告，返回报告名
     return res
 
 
@@ -850,44 +872,38 @@ def get_statistic(pipe_defect_summary):
             continue
         labels.append(structure_defect_names[i])
         sizes.append(structure_defect_count[i] / total)
-    fig, axes = plt.subplots(figsize=(10, 7), ncols=2)  # 1000x500
+    fig, axes = plt.subplots(figsize = (10, 7), ncols = 2)  # 1000x500
     ax1, ax2 = axes.ravel()
     colors = cm.rainbow(np.arange(len(sizes)) / len(sizes))  # colormaps: Paired, autumn, rainbow, gray,spring,Darks
-    patches, texts, autotexts = ax1.pie(sizes, labels=labels, autopct='%1.0f%%',
-                                        shadow=False, startangle=170, colors=colors)
+    patches, texts, autotexts = ax1.pie(sizes, labels = labels, autopct = '%1.0f%%', shadow = False, startangle = 170,
+                                        colors = colors)
     ax1.axis('equal')
     proptease = fm.FontProperties()
     proptease.set_size('medium')
     # font size include: ‘xx-small’,x-small’,'small’,'medium’,‘large’,‘x-large’,‘xx-large’ or number, e.g. '12'
-    plt.setp(autotexts, fontproperties=proptease)
-    plt.setp(texts, fontproperties=proptease)
-
+    plt.setp(autotexts, fontproperties = proptease)
+    plt.setp(texts, fontproperties = proptease)
+    
     ax2.axis('off')
-    ax2.legend(patches, labels, loc='center')
-
+    ax2.legend(patches, labels, loc = 'center')
+    
     plt.tight_layout()
     plt.savefig(images_path + 'structure_defect_summary_statistic.png')
-
+    
     def get_structure_grade_total(i):
         i = str(i)
-        return sum(
-            [pipe_defect_summary['defects_count']['AJ' + i],
-             pipe_defect_summary['defects_count']['BX' + i],
-             pipe_defect_summary['defects_count']['CK' + i],
-             pipe_defect_summary['defects_count']['CR' + i],
-             pipe_defect_summary['defects_count']['FS' + i],
-             pipe_defect_summary['defects_count']['PL' + i],
-             pipe_defect_summary['defects_count']['QF' + i],
-             pipe_defect_summary['defects_count']['SL' + i],
-             pipe_defect_summary['defects_count']['TJ' + i],
-             pipe_defect_summary['defects_count']['TL' + i]])
-
+        return sum([pipe_defect_summary['defects_count']['AJ' + i], pipe_defect_summary['defects_count']['BX' + i],
+                    pipe_defect_summary['defects_count']['CK' + i], pipe_defect_summary['defects_count']['CR' + i],
+                    pipe_defect_summary['defects_count']['FS' + i], pipe_defect_summary['defects_count']['PL' + i],
+                    pipe_defect_summary['defects_count']['QF' + i], pipe_defect_summary['defects_count']['SL' + i],
+                    pipe_defect_summary['defects_count']['TJ' + i], pipe_defect_summary['defects_count']['TL' + i]])
+    
     pipe_defect_summary['defects_count']['structure_grade1_total'] = get_structure_grade_total(1)
     pipe_defect_summary['defects_count']['structure_grade2_total'] = get_structure_grade_total(2)
     pipe_defect_summary['defects_count']['structure_grade3_total'] = get_structure_grade_total(3)
     pipe_defect_summary['defects_count']['structure_grade4_total'] = get_structure_grade_total(4)
     pipe_defect_summary['defects_count']['structure_grade_total'] = sum(
-        [pipe_defect_summary['defects_count']['structure_grade{}_total'.format(i)] for i in range(1, 5)])
+            [pipe_defect_summary['defects_count']['structure_grade{}_total'.format(i)] for i in range(1, 5)])
     function_defect_count = [pipe_defect_summary['defects_count']['CJtotal'],
                              pipe_defect_summary['defects_count']['CQtotal'],
                              pipe_defect_summary['defects_count']['FZtotal'],
@@ -902,49 +918,43 @@ def get_statistic(pipe_defect_summary):
             continue
         labels.append(function_defect_names[i])
         sizes.append(function_defect_count[i] / total)
-    fig, axes = plt.subplots(figsize=(10, 7), ncols=2)  # 1000x500
+    fig, axes = plt.subplots(figsize = (10, 7), ncols = 2)  # 1000x500
     ax1, ax2 = axes.ravel()
     colors = cm.rainbow(np.arange(len(sizes)) / len(sizes))  # colormaps: Paired, autumn, rainbow, gray,spring,Darks
-    patches, texts, autotexts = ax1.pie(sizes, labels=labels, autopct='%1.0f%%',
-                                        shadow=False, startangle=170, colors=colors)
+    patches, texts, autotexts = ax1.pie(sizes, labels = labels, autopct = '%1.0f%%', shadow = False, startangle = 170,
+                                        colors = colors)
     ax1.axis('equal')
     proptease = fm.FontProperties()
     proptease.set_size('medium')
     # font size include: ‘xx-small’,x-small’,'small’,'medium’,‘large’,‘x-large’,‘xx-large’ or number, e.g. '12'
-    plt.setp(autotexts, fontproperties=proptease)
-    plt.setp(texts, fontproperties=proptease)
-
+    plt.setp(autotexts, fontproperties = proptease)
+    plt.setp(texts, fontproperties = proptease)
+    
     ax2.axis('off')
-    ax2.legend(patches, labels, loc='center')
-
+    ax2.legend(patches, labels, loc = 'center')
+    
     plt.tight_layout()
     plt.savefig(images_path + 'function_defect_summary_statistic.png')
-
+    
     def get_function_grade_total(i):
         i = str(i)
-        return sum(
-            [pipe_defect_summary['defects_count']['CJ' + i],
-             pipe_defect_summary['defects_count']['CQ' + i],
-             pipe_defect_summary['defects_count']['FZ' + i],
-             pipe_defect_summary['defects_count']['JG' + i],
-             pipe_defect_summary['defects_count']['SG' + i],
-             pipe_defect_summary['defects_count']['ZW' + i],
-             pipe_defect_summary['defects_count']['QF' + i],
-             pipe_defect_summary['defects_count']['SL' + i],
-             pipe_defect_summary['defects_count']['TJ' + i],
-             pipe_defect_summary['defects_count']['TL' + i]])
-
+        return sum([pipe_defect_summary['defects_count']['CJ' + i], pipe_defect_summary['defects_count']['CQ' + i],
+                    pipe_defect_summary['defects_count']['FZ' + i], pipe_defect_summary['defects_count']['JG' + i],
+                    pipe_defect_summary['defects_count']['SG' + i], pipe_defect_summary['defects_count']['ZW' + i],
+                    pipe_defect_summary['defects_count']['QF' + i], pipe_defect_summary['defects_count']['SL' + i],
+                    pipe_defect_summary['defects_count']['TJ' + i], pipe_defect_summary['defects_count']['TL' + i]])
+    
     pipe_defect_summary['defects_count']['function_grade1_total'] = get_function_grade_total(1)
     pipe_defect_summary['defects_count']['function_grade2_total'] = get_function_grade_total(2)
     pipe_defect_summary['defects_count']['function_grade3_total'] = get_function_grade_total(3)
     pipe_defect_summary['defects_count']['function_grade4_total'] = get_function_grade_total(4)
     pipe_defect_summary['defects_count']['function_grade_total'] = sum(
-        [pipe_defect_summary['defects_count']['function_grade{}_total'.format(i)] for i in range(1, 5)])
-
+            [pipe_defect_summary['defects_count']['function_grade{}_total'.format(i)] for i in range(1, 5)])
+    
     structure_defect_summary_statistic = InlineImage(doc, images_path + 'structure_defect_summary_statistic.png',
-                                                     height=Mm(120))
+                                                     height = Mm(120))
     function_defect_summary_statistic = InlineImage(doc, images_path + 'function_defect_summary_statistic.png',
-                                                    height=Mm(120))
+                                                    height = Mm(120))
     return [structure_defect_summary_statistic, function_defect_summary_statistic]
 
 
@@ -953,15 +963,14 @@ def get_all_defects(project_id):
     global colors
     all_structure_defects = []
     all_function_defects = []
-    lines = models.Line.objects.filter(project_id=project_id)
+    lines = models.Line.objects.filter(project_id = project_id)
     for line in lines:
-        temp = {'pipe_number': f'{line.start_number}~{line.end_number}',
-                'pipe_diameter': line.diameter,
-                'pipe_material': line.material,
-                'detection_length': line.detection_length
-                }
-        videos = models.Video.objects.filter(line_id=line.line_id)
-        defects = [models.Defect.objects.filter(video_id=video.video_id) for video in videos]
+        temp = {
+            'pipe_number'  : f'{line.start_number}~{line.end_number}', 'pipe_diameter': line.diameter,
+            'pipe_material': line.material, 'detection_length': line.detection_length
+        }
+        videos = models.Video.objects.filter(line_id = line.line_id)
+        defects = [models.Defect.objects.filter(video_id = video.video_id) for video in videos]
         defects = [i for j in defects for i in j]  # 二维数组转一维
         for defect in defects:
             temp['defect_distance'] = defect.defect_distance
@@ -984,19 +993,14 @@ def get_all_defects(project_id):
 
 # 检测结论一览表 和 缺陷管段情况汇总表
 def get_summary(pipes):
-    summary = {'structure_0_count': 0, 'structure_1_count': 0,
-               'structure_2_count': 0, 'structure_3_count': 0,
-               'structure_4_count': 0,
-               'function_0_count': 0, 'function_1_count': 0,
-               'function_2_count': 0, 'function_3_count': 0,
-               'function_4_count': 0,
-               'structure_0_percent': '0.00%', 'structure_1_percent': '0.00%',
-               'structure_2_percent': '0.00%', 'structure_3_percent': '0.00%',
-               'structure_4_percent': '0.00%',
-               'function_0_percent': '0.00%', 'function_1_percent': '0.00%',
-               'function_2_percent': '0.00%', 'function_3_percent': '0.00%',
-               'function_4_percent': '0.00%',
-               }
+    summary = {
+        'structure_0_count'  : 0, 'structure_1_count': 0, 'structure_2_count': 0, 'structure_3_count': 0,
+        'structure_4_count'  : 0, 'function_0_count': 0, 'function_1_count': 0, 'function_2_count': 0,
+        'function_3_count'   : 0, 'function_4_count': 0, 'structure_0_percent': '0.00%', 'structure_1_percent': '0.00%',
+        'structure_2_percent': '0.00%', 'structure_3_percent': '0.00%', 'structure_4_percent': '0.00%',
+        'function_0_percent' : '0.00%', 'function_1_percent': '0.00%', 'function_2_percent': '0.00%',
+        'function_3_percent' : '0.00%', 'function_4_percent': '0.00%',
+    }
     for pipe in pipes:
         if pipe['structure_defect_grade'] in grade:
             grade_index = grade.index(pipe['structure_defect_grade'])
@@ -1006,9 +1010,9 @@ def get_summary(pipes):
             summary['function_{}_count'.format(grade_index + 1)] += 1
     for i in range(5):
         summary['structure_{}_percent'.format(i)] = '{:.2f}%'.format(
-            100 * summary['structure_{}_count'.format(i)] / len(pipes))
+                100 * summary['structure_{}_count'.format(i)] / len(pipes))
         summary['function_{}_percent'.format(i)] = '{:.2f}%'.format(
-            100 * summary['function_{}_count'.format(i)] / len(pipes))
+                100 * summary['function_{}_count'.format(i)] / len(pipes))
     # 缺陷管段情况汇总表
     summary['structure_defect_count'] = sum([summary['structure_{}_count'.format(i)] for i in range(1, 5)])
     summary['function_defect_count'] = sum([summary['function_{}_count'.format(i)] for i in range(1, 5)])
@@ -1016,9 +1020,9 @@ def get_summary(pipes):
     summary['function_defect_percent'] = '{:.2f}%'.format(100 * summary['function_defect_count'] / len(pipes))
     for i in range(1, 5):
         summary['structure_defect_{}_percent'.format(i)] = '{:.2f}%'.format(
-            100 * summary['structure_{}_count'.format(i)] / summary['structure_defect_count'])
+                100 * summary['structure_{}_count'.format(i)] / summary['structure_defect_count'])
         summary['function_defect_{}_percent'.format(i)] = '{:.2f}%'.format(
-            100 * summary['function_{}_count'.format(i)] / summary['function_defect_count'])
+                100 * summary['function_{}_count'.format(i)] / summary['function_defect_count'])
     return summary
 
 
@@ -1027,49 +1031,40 @@ def generate_report(project_id):
     if os.path.exists('final.docx'):
         os.remove('final.docx')
     doc = DocxTemplate('template.docx')
-
-    project = models.Project.objects.filter(project_id=project_id)[0]
-    lines = models.Line.objects.filter(project_id=project_id)
+    
+    project = models.Project.objects.filter(project_id = project_id)[0]
+    lines = models.Line.objects.filter(project_id = project_id)
     pipe_defect_summary = get_pipe_defect_summary(project_id)
     pipes = get_pipes(project_id)
     videos = get_videos(project_id)
     statistic = get_statistic(pipe_defect_summary)
     all_defects = get_all_defects(project_id)
     summary = get_summary(pipes)
-
+    
     context = {
-        'project_name': project.project_name,
-        'project_no': project.project_no,
-        'project_address': project.project_address,
-        'requester_unit': project.requester_unit,
-        'supervisory_unit': project.supervisory_unit,
-        'construction_unit': project.construction_unit,
-        'design_unit': project.design_unit,
-        'build_unit': project.build_unit,
-        'report_no': project.report_no,
-        'staff_name': project.staff,
-        'current_year': datetime.datetime.today().year,
-        'current_month': datetime.datetime.today().month,
-        'current_day': datetime.datetime.today().day,
-        'start_record_date': project.start_date,
-        'pipe_amount': len(lines),
-        'pipe_total_length': sum([lines[i].total_length for i in range(len(lines))]),
-        'pipe_total_detection_length': sum([lines[i].detection_length for i in range(len(lines))]),
-        'detection_method': project.detection_method,
-        'detection_equipment': project.detection_equipment,
-        'move_method': project.move,
-        'plugging_method': project.plugging,
-        'drainage_method': project.drainage,
-        'dredging_method': project.dredging,
-        'pipe_defect_summary': pipe_defect_summary,
-        'pipes': pipes,
-        'videos': videos,
-        'structure_defect_summary_statistic': statistic[0],
-        'function_defect_summary_statistic': statistic[1],
-        'all_structure_defects': all_defects[0],
-        'all_function_defects': all_defects[1],
-        'summary': summary
+        'project_name'                      : project.project_name, 'project_no': project.project_no,
+        'project_address'                   : project.project_address, 'requester_unit': project.requester_unit,
+        'supervisory_unit'                  : project.supervisory_unit, 'construction_unit': project.construction_unit,
+        'design_unit'                       : project.design_unit, 'build_unit': project.build_unit,
+        'report_no'                         : project.report_no, 'staff_name': project.staff,
+        'current_year'                      : datetime.datetime.today().year,
+        'current_month'                     : datetime.datetime.today().month,
+        'current_day'                       : datetime.datetime.today().day, 'start_record_date': project.start_date,
+        'pipe_amount'                       : len(lines),
+        'pipe_total_length'                 : sum([lines[i].total_length for i in range(len(lines))]),
+        'pipe_total_detection_length'       : sum([lines[i].detection_length for i in range(len(lines))]),
+        'detection_method'                  : project.detection_method,
+        'detection_equipment'               : project.detection_equipment, 'move_method': project.move,
+        'plugging_method'                   : project.plugging, 'drainage_method': project.drainage,
+        'dredging_method'                   : project.dredging, 'pipe_defect_summary': pipe_defect_summary,
+        'pipes'                             : pipes, 'videos': videos,
+        'structure_defect_summary_statistic': statistic[0], 'function_defect_summary_statistic': statistic[1],
+        'all_structure_defects'             : all_defects[0], 'all_function_defects': all_defects[1], 'summary': summary
     }
-    doc.render(context)
-    doc.save('final.docx')
+    try:
+        doc.render(context)
+        doc.save('final.docx')
+    except Exception as e:
+        error_line = e.__traceback__.tb_lineno  # 出错行数
+        raise Exception(str(e) + ' line({})'.format(error_line))
     return project.project_name

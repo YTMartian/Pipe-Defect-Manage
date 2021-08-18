@@ -1,6 +1,6 @@
-import {useHistory} from "react-router-dom"
+import { useHistory } from "react-router-dom"
 import request from "../../../request"
-import React, {useState} from "react"
+import React, { useState } from "react"
 import 'antd/dist/antd.css'
 import './style.css'
 import {
@@ -14,9 +14,9 @@ import {
     Select
 } from 'antd';
 
-const {Search} = Input;
-const {RangePicker} = DatePicker;
-const {Option} = Select;
+const { Search } = Input;
+const { RangePicker } = DatePicker;
+const { Option } = Select;
 message.config({
     top: 150
 });
@@ -26,8 +26,8 @@ const ProjectList = () => {
     const history = useHistory();
     const [searchSelect, setSearchSelect] = useState('project_name');
     const [initialization, setInitialization] = useState(true);
-    const [data, setData] = useState({currentData: [], allData: []});
-    const [state, setState] = useState({selectedRowKeys: []});//使用state从而更改数据后能够实时更新
+    const [data, setData] = useState({ currentData: [], allData: [] });
+    const [state, setState] = useState({ selectedRowKeys: [] });//使用state从而更改数据后能够实时更新
 
     const getProject = () => {
         request({
@@ -49,12 +49,12 @@ const ProjectList = () => {
                         report_no: response.data.list[i]['fields']['report_no'],
                     });
                 }
-                setData({currentData: newData, allData: newData});
+                setData({ currentData: newData, allData: newData });
             } else {
-                message.error('获取失败1' + response.data.msg, 3)
+                message.error('获取失败1:' + response.data.msg, 3)
             }
         }).catch(function (error) {
-            message.error('删除失败2' + error);
+            message.error('获取失败2:' + error);
         });
     };
     if (initialization) {
@@ -78,28 +78,28 @@ const ProjectList = () => {
                 message.success('删除成功');
                 getProject();
             } else {
-                message.error('删除失败1' + response.data.msg, 3)
+                message.error('删除失败1:' + response.data.msg, 3)
             }
         }).catch(function (error) {
-            message.error('删除失败2' + error);
+            message.error('删除失败2:' + error);
         });
     };
 
     const onSearch = value => {
         if (value.length === 0) {
-            setData({currentData: data.allData, allData: data.allData});
+            setData({ currentData: data.allData, allData: data.allData });
             return;
         }
         let newData = [];
         for (let i = 0; i < data.allData.length; i++) {
             if (data.allData[i][searchSelect].includes(value)) newData.push(data.allData[i]);
         }
-        setData({currentData: newData, allData: data.allData});
+        setData({ currentData: newData, allData: data.allData });
     };
 
     const onRangePickerChange = value => {
         if (value === null) {
-            setData({currentData: data.allData, allData: data.allData});
+            setData({ currentData: data.allData, allData: data.allData });
             return;
         }
         let startDate = value[0].format("YYYY-MM-DD");
@@ -111,7 +111,7 @@ const ProjectList = () => {
             let currentDate = new Date(data.allData[i]['start_date']);
             if (currentDate >= startDate && currentDate <= endDate) newData.push(data.allData[i]);
         }
-        setData({currentData: newData, allData: data.allData});
+        setData({ currentData: newData, allData: data.allData });
     };
 
     const onSearchSelect = value => {
@@ -120,10 +120,10 @@ const ProjectList = () => {
 
     const onSelectChange = selectedRowKeys => {
         console.log('selectedRowKeys changed: ', selectedRowKeys);
-        setState({selectedRowKeys: selectedRowKeys});
+        setState({ selectedRowKeys: selectedRowKeys });
     };
 
-    const {selectedRowKeys} = state;
+    const { selectedRowKeys } = state;
     const rowSelection = {
         selectedRowKeys,
         onChange: onSelectChange,
@@ -136,7 +136,7 @@ const ProjectList = () => {
                     newSelectedRowKeys = allRowKeys.filter((key, index) => {
                         return true;
                     });
-                    setState({selectedRowKeys: newSelectedRowKeys});
+                    setState({ selectedRowKeys: newSelectedRowKeys });
                 },
             },
             {
@@ -147,7 +147,7 @@ const ProjectList = () => {
                     newSelectedRowKeys = allRowKeys.filter((key, index) => {
                         return !(state.selectedRowKeys.includes(key));//用includes判断是否含有某元素
                     });
-                    setState({selectedRowKeys: newSelectedRowKeys});
+                    setState({ selectedRowKeys: newSelectedRowKeys });
                 },
             },
             {
@@ -155,7 +155,7 @@ const ProjectList = () => {
                 text: '清空',
                 onSelect: allRowKeys => {
                     let newSelectedRowKeys = [];
-                    setState({selectedRowKeys: newSelectedRowKeys});
+                    setState({ selectedRowKeys: newSelectedRowKeys });
                 },
             },
         ],
@@ -191,7 +191,7 @@ const ProjectList = () => {
                     <a href="javascript:" onClick={() => {
                         history.push({
                             pathname: '/ProjectManage/AddProject',
-                            state: {isEdit: true, project_id: record.key, initialization: true}
+                            state: { isEdit: true, project_id: record.key, initialization: true }
                         })
                     }}>{project_name}</a>
                 </Tooltip>
@@ -260,7 +260,7 @@ const ProjectList = () => {
                 // eslint-disable-next-line jsx-a11y/anchor-is-valid,no-script-url
                 <a href="javascript:" onClick={() => history.push({
                     pathname: '/ProjectManage/LineList',
-                    state: {project_id: record.key, initialization: true}
+                    state: { project_id: record.key, initialization: true }
                 })}>管线</a>
             )
         },
@@ -274,7 +274,7 @@ const ProjectList = () => {
                     // eslint-disable-next-line jsx-a11y/anchor-is-valid,no-script-url
                     <a href="javascript:" onClick={() => history.push({
                         pathname: '/ProjectManage/VideoList',
-                        state: {project_id: record.key, initialization: true}
+                        state: { project_id: record.key, initialization: true }
                     })}>视频</a>
         },
         {
@@ -285,7 +285,7 @@ const ProjectList = () => {
                 (_, record) =>
                     // eslint-disable-next-line jsx-a11y/anchor-is-valid,no-script-url,react/jsx-no-target-blank
                     <a href={`${request.defaults.baseURL}get_report/${record.key}`}
-                       download={record.project_name}>报告</a>//使用download，这样返回的东西都以文件下载
+                        download={record.project_name}>报告</a>//使用download，这样返回的东西都以文件下载
         },
     ];
     return (
@@ -295,7 +295,7 @@ const ProjectList = () => {
                     onClick={() => {
                         history.push({
                             pathname: '/ProjectManage/AddProject',
-                            state: {isEdit: false, initialization: true}
+                            state: { isEdit: false, initialization: true }
                         })
                     }}
                     type="primary"
@@ -316,7 +316,7 @@ const ProjectList = () => {
                         marginLeft: "1%"
                     }}
                 />
-                <Select defaultValue="以工程名称" style={{float: 'left', width: 120}} onChange={onSearchSelect}>
+                <Select defaultValue="以工程名称" style={{ float: 'left', width: 120 }} onChange={onSearchSelect}>
                     <Option value="project_name">以工程名称</Option>
                     <Option value="project_no">以工程编号</Option>
                     <Option value="staff">以负责人</Option>

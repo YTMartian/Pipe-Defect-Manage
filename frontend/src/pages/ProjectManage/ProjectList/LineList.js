@@ -1,7 +1,7 @@
-import {useHistory, useLocation} from "react-router-dom"
-import {Table, Button, Popconfirm, message} from 'antd'
+import { useHistory, useLocation } from "react-router-dom"
+import { Table, Button, Popconfirm, message } from 'antd'
 import request from "../../../request"
-import React, {useState} from "react"
+import React, { useState } from "react"
 import 'antd/dist/antd.css'
 import './style.css'
 
@@ -13,8 +13,8 @@ message.config({
 const LineList = () => {
     const history = useHistory();
     const location = useLocation();
-    const [data, setData] = useState({currentData: [], allData: []});
-    const [state, setState] = useState({selectedRowKeys: []});//使用state从而更改数据后能够实时更新
+    const [data, setData] = useState({ currentData: [], allData: [] });
+    const [state, setState] = useState({ selectedRowKeys: [] });//使用state从而更改数据后能够实时更新
 
     const getLine = () => {
         request({
@@ -37,12 +37,12 @@ const LineList = () => {
                         diameter: response.data.list[i]['fields']['diameter'],
                     });
                 }
-                setData({currentData: newData, allData: newData});
+                setData({ currentData: newData, allData: newData });
             } else {
-                message.error('获取失败： ' + response.data.msg, 3)
+                message.error('获取失败:' + response.data.msg, 3)
             }
         }).catch(function (error) {
-            message.error('获取失败', error, 3);
+            message.error('获取失败:', error, 3);
         });
     };
 
@@ -72,19 +72,19 @@ const LineList = () => {
                 message.success('删除成功', 3);
                 getLine();
             } else {
-                message.error('删除失败： ' + response.data.msg, 3)
+                message.error('删除失败:' + response.data.msg, 3)
             }
         }).catch(function (error) {
-            message.error('删除失败', error, 3);
+            message.error('删除失败:', error, 3);
         });
     };
 
     const onSelectChange = selectedRowKeys => {
         console.log('selectedRowKeys changed: ', selectedRowKeys);
-        setState({selectedRowKeys: selectedRowKeys});
+        setState({ selectedRowKeys: selectedRowKeys });
     };
 
-    const {selectedRowKeys} = state;
+    const { selectedRowKeys } = state;
     const rowSelection = {
         selectedRowKeys,
         onChange: onSelectChange,
@@ -97,7 +97,7 @@ const LineList = () => {
                     newSelectedRowKeys = allRowKeys.filter((key, index) => {
                         return true;
                     });
-                    setState({selectedRowKeys: newSelectedRowKeys});
+                    setState({ selectedRowKeys: newSelectedRowKeys });
                 },
             },
             {
@@ -108,7 +108,7 @@ const LineList = () => {
                     newSelectedRowKeys = allRowKeys.filter((key, index) => {
                         return !(state.selectedRowKeys.includes(key));//用includes判断是否含有某元素
                     });
-                    setState({selectedRowKeys: newSelectedRowKeys});
+                    setState({ selectedRowKeys: newSelectedRowKeys });
                 },
             },
             {
@@ -116,7 +116,7 @@ const LineList = () => {
                 text: '清空',
                 onSelect: allRowKeys => {
                     let newSelectedRowKeys = [];
-                    setState({selectedRowKeys: newSelectedRowKeys});
+                    setState({ selectedRowKeys: newSelectedRowKeys });
                 },
             },
         ],
@@ -182,7 +182,7 @@ const LineList = () => {
                 // eslint-disable-next-line jsx-a11y/anchor-is-valid,no-script-url
                 <a href="javascript:" onClick={() => history.push({
                     pathname: '/ProjectManage/PointList',
-                    state: {project_id: location.state.project_id, line_id: record.key, initialization: true}
+                    state: { project_id: location.state.project_id, line_id: record.key, initialization: true }
                 })}>管点</a>
             )
         },
@@ -212,7 +212,7 @@ const LineList = () => {
                     onClick={() => {
                         history.push('/ProjectManage/ProjectList')
                     }}
-                    style={{float: 'left'}}
+                    style={{ float: 'left' }}
                 >
                     返回
                 </Button>
@@ -220,14 +220,14 @@ const LineList = () => {
                     onClick={() => {
                         history.push({
                             pathname: '/ProjectManage/AddLine',
-                            state: {isEdit: false, project_id: location.state.project_id, initialization: true}
+                            state: { isEdit: false, project_id: location.state.project_id, initialization: true }
                         })
                     }}
                     type="primary"
                     style={{
                         marginBottom: 16,
                         float: 'left',
-                        marginLeft:"1%"
+                        marginLeft: "1%"
                     }}
                 >
                     添加管线

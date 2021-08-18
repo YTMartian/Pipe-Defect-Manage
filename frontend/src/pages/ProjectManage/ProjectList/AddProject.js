@@ -1,7 +1,7 @@
 import React from "react";
 import 'antd/dist/antd.css';
 import request from '../../../request'
-import {useHistory, useLocation} from 'react-router-dom';
+import { useHistory, useLocation } from 'react-router-dom';
 import moment from 'moment';
 import {
     Form,
@@ -87,10 +87,10 @@ const AddProject = () => {
                             detection_method: response.data.list[0]['fields']['detection_method'],
                         });
                         if (response.data.list[0]['fields']['start_date'].length > 0) {
-                            form.setFieldsValue({start_date: moment(response.data.list[0]['fields']['start_date'], 'YYYY-MM-DD')})
+                            form.setFieldsValue({ start_date: moment(response.data.list[0]['fields']['start_date'], 'YYYY-MM-DD') })
                         }
                     } else {
-                        message.error('获取工程失败： ' + response.data.msg, 3)
+                        message.error('获取工程失败:' + response.data.msg, 3)
                     }
                 }).catch(function (error) {
                     message.error(error);
@@ -105,9 +105,9 @@ const AddProject = () => {
     const onFinish = (values) => {
         //解决时间少8个小时的问题
         values.start_date = values.start_date != null ? moment(values.start_date).format("YYYY-MM-DD") : "";
-        let data = {"isEdit": false, "values": values};
+        let data = { "isEdit": false, "values": values };
         if (location.state.isEdit) {
-            data = {"isEdit": true, "values": values, "project_id": location.state.project_id}
+            data = { "isEdit": true, "values": values, "project_id": location.state.project_id }
         }
         request({
             method: 'post',
@@ -122,7 +122,7 @@ const AddProject = () => {
                     history.push('/ProjectManage/ProjectList')
                 }
             } else {
-                message.error('添加失败： ' + response.data.msg, 3)
+                message.error('添加失败:' + response.data.msg, 3)
             }
         }).catch(function (error) {
             message.error(error);
@@ -141,96 +141,96 @@ const AddProject = () => {
                 <Row gutter={16}>
                     <Col span={12}>
                         <Form.Item label="工程编号" name="project_no">
-                            <Input/>
+                            <Input />
                         </Form.Item>
                     </Col>
                     <Col span={12}>
-                        <Form.Item label="工程名称" name="project_name" rules={[{required: true, message: '不能为空'}]}>
-                            <Input/>
+                        <Form.Item label="工程名称" name="project_name" rules={[{ required: true, message: '不能为空' }]}>
+                            <Input />
                         </Form.Item>
                     </Col>
                 </Row>
                 <Row gutter={16}>
                     <Col span={12}>
                         <Form.Item label="负责人" name="staff">
-                            <Input/>
+                            <Input />
                         </Form.Item>
                     </Col>
                     <Col span={12}>
                         <Form.Item label="开工日期" name="start_date">
-                            <DatePicker placeholder="选择日期"/>
+                            <DatePicker placeholder="选择日期" />
                         </Form.Item>
                     </Col>
                 </Row>
                 <Row gutter={16}>
                     <Col span={12}>
                         <Form.Item label="报告编号" name="report_no">
-                            <Input/>
+                            <Input />
                         </Form.Item>
                     </Col>
                     <Col span={12}>
                         <Form.Item label="委托单位" name="requester_unit">
-                            <Input/>
+                            <Input />
                         </Form.Item>
                     </Col>
                 </Row>
                 <Row gutter={16}>
                     <Col span={12}>
                         <Form.Item label="建设单位" name="construction_unit">
-                            <Input/>
+                            <Input />
                         </Form.Item>
                     </Col>
                     <Col span={12}>
                         <Form.Item label="设计单位" name="design_unit">
-                            <Input/>
+                            <Input />
                         </Form.Item>
                     </Col>
                 </Row>
                 <Row gutter={16}>
                     <Col span={12}>
                         <Form.Item label="施工单位" name="build_unit">
-                            <Input/>
+                            <Input />
                         </Form.Item>
                     </Col>
                     <Col span={12}>
                         <Form.Item label="监理单位" name="supervisory_unit">
-                            <Input/>
+                            <Input />
                         </Form.Item>
                     </Col>
                 </Row>
                 <Row gutter={16}>
                     <Col span={12}>
                         <Form.Item label="移动方式" name="move">
-                            <Input/>
+                            <Input />
                         </Form.Item>
                     </Col>
                     <Col span={12}>
                         <Form.Item label="封堵方式" name="plugging">
-                            <Input/>
+                            <Input />
                         </Form.Item>
                     </Col>
                 </Row>
                 <Row gutter={16}>
                     <Col span={12}>
                         <Form.Item label="排水方式" name="drainage">
-                            <Input/>
+                            <Input />
                         </Form.Item>
                     </Col>
                     <Col span={12}>
                         <Form.Item label="清疏方式" name="dredging">
-                            <Input/>
+                            <Input />
                         </Form.Item>
                     </Col>
                 </Row>
                 <Row gutter={16}>
                     <Col span={12}>
                         <Form.Item label="检测设备" name="detection_equipment">
-                            <Input/>
+                            <Input />
                         </Form.Item>
                     </Col>
                     <Col span={12}>
                         <Form.Item label="检测方式" name="detection_method">
-                            <Input/>
+                            <Input />
                         </Form.Item>
                     </Col>
                 </Row>

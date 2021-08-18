@@ -1,7 +1,7 @@
 import React from "react";
 import 'antd/dist/antd.css';
 import request from '../../../request'
-import {useHistory, useLocation} from 'react-router-dom';
+import { useHistory, useLocation } from 'react-router-dom';
 import moment from 'moment';
 import {
     Form,
@@ -17,7 +17,7 @@ import {
     Col
 } from 'antd'
 
-const {Option} = Select;
+const { Option } = Select;
 
 message.config({
     top: 200
@@ -91,10 +91,10 @@ const AddPoint = () => {
                             remark: response.data.list[0]['fields']['remark'],
                         });
                         if (response.data.list[0]['fields']['detection_date'].length > 0) {
-                            form.setFieldsValue({detection_date: moment(response.data.list[0]['fields']['detection_date'], 'YYYY-MM-DD')})
+                            form.setFieldsValue({ detection_date: moment(response.data.list[0]['fields']['detection_date'], 'YYYY-MM-DD') })
                         }
                     } else {
-                        message.error('获取管点失败： ' + response.data.msg, 3)
+                        message.error('获取管点失败:' + response.data.msg, 3)
                     }
                 }).catch(function (error) {
                     message.error(error);
@@ -109,9 +109,9 @@ const AddPoint = () => {
     const onFinish = (values) => {
         //解决时间少8个小时的问题
         values.detection_date = values.detection_date != null ? moment(values.detection_date).format("YYYY-MM-DD") : "";
-        let data = {"isEdit": false, "line_id": location.state.line_id, "values": values};
+        let data = { "isEdit": false, "line_id": location.state.line_id, "values": values };
         if (location.state.isEdit) {
-            data = {"isEdit": true, "values": values, "point_id": location.state.point_id}
+            data = { "isEdit": true, "values": values, "point_id": location.state.point_id }
         }
         request({
             method: 'post',
@@ -124,17 +124,17 @@ const AddPoint = () => {
                 } else {
                     message.success('添加成功', 3);
                     history.push({
-                            pathname: '/ProjectManage/PointList',
-                            state: {
-                                isEdit: false,
-                                project_id: location.state.project_id,
-                                line_id: location.state.line_id,
-                                initialization: true
-                            }
-                        })
+                        pathname: '/ProjectManage/PointList',
+                        state: {
+                            isEdit: false,
+                            project_id: location.state.project_id,
+                            line_id: location.state.line_id,
+                            initialization: true
+                        }
+                    })
                 }
             } else {
-                message.error('添加失败： ' + response.data.msg, 3)
+                message.error('添加失败:' + response.data.msg, 3)
             }
         }).catch(function (error) {
             message.error(error);
@@ -153,24 +153,24 @@ const AddPoint = () => {
                 <Row gutter={16}>
                     <Col span={12}>
                         <Form.Item label="管线点特征" name="feature">
-                            <Input/>
+                            <Input />
                         </Form.Item>
                     </Col>
                     <Col span={12}>
                         <Form.Item label="管线附属物" name="attachment">
-                            <Input/>
+                            <Input />
                         </Form.Item>
                     </Col>
                 </Row>
                 <Row gutter={16}>
                     <Col span={12}>
-                        <Form.Item label="点地面高程" name="height" rules={[{required: true, message: '不能为空'}]}>
-                            <InputNumber/>
+                        <Form.Item label="点地面高程" name="height" rules={[{ required: true, message: '不能为空' }]}>
+                            <InputNumber />
                         </Form.Item>
                     </Col>
                     <Col span={12}>
                         <Form.Item label="要素类别" name="feature_category"
-                                   rules={[{required: true, message: '不能为空'}]}>
+                            rules={[{ required: true, message: '不能为空' }]}>
                             <Select>
                                 <Option value="雨水">雨水</Option>
                                 <Option value="污水">污水</Option>
@@ -181,73 +181,73 @@ const AddPoint = () => {
                 </Row>
                 <Row gutter={16}>
                     <Col span={12}>
-                        <Form.Item label="X坐标" name="x_coordinate" rules={[{required: true, message: '不能为空'}]}>
-                            <InputNumber/>
+                        <Form.Item label="X坐标" name="x_coordinate" rules={[{ required: true, message: '不能为空' }]}>
+                            <InputNumber />
                         </Form.Item>
                     </Col>
                     <Col span={12}>
-                        <Form.Item label="Y坐标" name="y_coordinate" rules={[{required: true, message: '不能为空'}]}>
-                            <InputNumber/>
+                        <Form.Item label="Y坐标" name="y_coordinate" rules={[{ required: true, message: '不能为空' }]}>
+                            <InputNumber />
                         </Form.Item>
                     </Col>
                 </Row>
                 <Row gutter={16}>
                     <Col span={12}>
-                        <Form.Item label="井底埋深" name="depth" rules={[{required: true, message: '不能为空'}]}>
-                            <InputNumber/>
+                        <Form.Item label="井底埋深" name="depth" rules={[{ required: true, message: '不能为空' }]}>
+                            <InputNumber />
                         </Form.Item>
                     </Col>
                     <Col span={12}>
                         <Form.Item label="所在道路" name="road_where">
-                            <Input/>
+                            <Input />
                         </Form.Item>
                     </Col>
                 </Row>
                 <Row gutter={16}>
                     <Col span={12}>
                         <Form.Item label="埋设年代" name="build_year">
-                            <InputNumber/>
+                            <InputNumber />
                         </Form.Item>
                     </Col>
                     <Col span={12}>
                         <Form.Item label="权属单位" name="ownership">
-                            <Input/>
+                            <Input />
                         </Form.Item>
                     </Col>
                 </Row>
                 <Row gutter={16}>
                     <Col span={12}>
                         <Form.Item label="探测日期" name="detection_date">
-                            <DatePicker placeholder="选择日期"/>
+                            <DatePicker placeholder="选择日期" />
                         </Form.Item>
                     </Col>
                     <Col span={12}>
                         <Form.Item label="探测单位" name="detection_unit">
-                            <Input/>
+                            <Input />
                         </Form.Item>
                     </Col>
                 </Row>
                 <Row gutter={16}>
                     <Col span={12}>
                         <Form.Item label="监理单位" name="supervisor_unit">
-                            <Input/>
+                            <Input />
                         </Form.Item>
                     </Col>
                     <Col span={12}>
                         <Form.Item label="状态" name="state">
-                            <Input/>
+                            <Input />
                         </Form.Item>
                     </Col>
                 </Row>
                 <Row gutter={16}>
                     <Col span={12}>
                         <Form.Item label="精度级别" name="precision_level">
-                            <Input/>
+                            <Input />
                         </Form.Item>
                     </Col>
                     <Col span={12}>
                         <Form.Item label="备注" name="remark">
-                            <Input.TextArea autoSize={{ minRows: 1}}/>
+                            <Input.TextArea autoSize={{ minRows: 1 }} />
                         </Form.Item>
                     </Col>
                 </Row>

@@ -1,4 +1,4 @@
-import {useHistory, useLocation} from 'react-router-dom';
+import { useHistory, useLocation } from 'react-router-dom';
 import request from '../../../request'
 import 'antd/dist/antd.css'
 import moment from 'moment'
@@ -17,7 +17,7 @@ import {
     Col
 } from 'antd'
 
-const {Option} = Select;
+const { Option } = Select;
 
 message.config({
     top: 200
@@ -105,10 +105,10 @@ const AddLine = () => {
                             type: response.data.list[0]['fields']['type']
                         });
                         if (response.data.list[0]['fields']['detection_date'].length > 0) {
-                            form.setFieldsValue({detection_date: moment(response.data.list[0]['fields']['detection_date'], 'YYYY-MM-DD')})
+                            form.setFieldsValue({ detection_date: moment(response.data.list[0]['fields']['detection_date'], 'YYYY-MM-DD') })
                         }
                     } else {
-                        message.error('获取管线失败： ' + response.data.msg, 3)
+                        message.error('获取管线失败:' + response.data.msg, 3)
                     }
                 }).catch(function (error) {
                     message.error(error);
@@ -123,9 +123,9 @@ const AddLine = () => {
     const onFinish = (values) => {
         //解决时间少8个小时的问题
         values.detection_date = values.detection_date != null ? moment(values.detection_date).format("YYYY-MM-DD") : "";
-        let data = {"isEdit": false, "project_id": location.state.project_id, "values": values};
+        let data = { "isEdit": false, "project_id": location.state.project_id, "values": values };
         if (location.state.isEdit) {
-            data = {"isEdit": true, "values": values, "line_id": location.state.line_id}
+            data = { "isEdit": true, "values": values, "line_id": location.state.line_id }
         }
         request({
             method: 'post',
@@ -139,11 +139,11 @@ const AddLine = () => {
                     message.success('添加成功', 3);
                     history.push({
                         pathname: '/ProjectManage/LineList',
-                        state: {project_id: location.state.project_id, initialization: true}
+                        state: { project_id: location.state.project_id, initialization: true }
                     })
                 }
             } else {
-                message.error('添加失败： ' + response.data.msg, 3)
+                message.error('添加失败:' + response.data.msg, 3)
             }
         }).catch(function (error) {
             message.error(error);
@@ -161,20 +161,20 @@ const AddLine = () => {
             >
                 <Row gutter={16}>
                     <Col span={12}>
-                        <Form.Item label="起始点编号" name="start_number" rules={[{required: true, message: '不能为空'}]}>
-                            <Input/>
+                        <Form.Item label="起始点编号" name="start_number" rules={[{ required: true, message: '不能为空' }]}>
+                            <Input />
                         </Form.Item>
                     </Col>
                     <Col span={12}>
-                        <Form.Item label="终止点编号" name="end_number" rules={[{required: true, message: '不能为空'}]}>
-                            <Input/>
+                        <Form.Item label="终止点编号" name="end_number" rules={[{ required: true, message: '不能为空' }]}>
+                            <Input />
                         </Form.Item>
                     </Col>
                 </Row>
                 <Row gutter={16}>
                     <Col span={12}>
                         <Form.Item label="地区重要性" name="regional_importance_id"
-                                   rules={[{required: true, message: '不能为空'}]}>
+                            rules={[{ required: true, message: '不能为空' }]}>
                             <Select>
                                 <Option value={1}>中心商业、附近具有甲类民用建筑工程的区域</Option>
                                 <Option value={2}>交通干道、附近具有乙类民用建筑工程的区域</Option>
@@ -185,7 +185,7 @@ const AddLine = () => {
                     </Col>
                     <Col span={12}>
                         <Form.Item label="土质级别" name="soil_id"
-                                   rules={[{required: true, message: '不能为空'}]}>
+                            rules={[{ required: true, message: '不能为空' }]}>
                             <Select>
                                 <Option value={1}>一般土层或 F=0</Option>
                                 <Option value={2}>Ⅰ级湿陷性黄土、Ⅱ级湿陷性黄土、弱膨胀土</Option>
@@ -198,60 +198,60 @@ const AddLine = () => {
                 <Row gutter={16}>
                     <Col span={12}>
                         <Form.Item label="起始点高程" name="start_height">
-                            <InputNumber/>
+                            <InputNumber />
                         </Form.Item>
                     </Col>
                     <Col span={12}>
                         <Form.Item label="终止点高程" name="end_height">
-                            <InputNumber/>
+                            <InputNumber />
                         </Form.Item>
                     </Col>
                 </Row>
                 <Row gutter={16}>
                     <Col span={12}>
                         <Form.Item label="起始点埋深" name="start_depth">
-                            <InputNumber/>
+                            <InputNumber />
                         </Form.Item>
                     </Col>
                     <Col span={12}>
                         <Form.Item label="终止点埋深" name="end_depth">
-                            <InputNumber/>
+                            <InputNumber />
                         </Form.Item>
                     </Col>
                 </Row>
                 <Row gutter={16}>
                     <Col span={12}>
                         <Form.Item label="起始X坐标" name="start_x_coordinate">
-                            <InputNumber/>
+                            <InputNumber />
                         </Form.Item>
                     </Col>
                     <Col span={12}>
                         <Form.Item label="起始Y坐标" name="start_y_coordinate">
-                            <InputNumber/>
+                            <InputNumber />
                         </Form.Item>
                     </Col>
                 </Row>
                 <Row gutter={16}>
                     <Col span={12}>
                         <Form.Item label="终止X坐标" name="end_x_coordinate">
-                            <InputNumber/>
+                            <InputNumber />
                         </Form.Item>
                     </Col>
                     <Col span={12}>
                         <Form.Item label="终止Y坐标" name="end_y_coordinate">
-                            <InputNumber/>
+                            <InputNumber />
                         </Form.Item>
                     </Col>
                 </Row>
                 <Row gutter={16}>
                     <Col span={12}>
                         <Form.Item label="总长度" name="total_length">
-                            <InputNumber min={0}/>
+                            <InputNumber min={0} />
                         </Form.Item>
                     </Col>
                     <Col span={12}>
                         <Form.Item label="检测长度" name="detection_length">
-                            <InputNumber min={0}/>
+                            <InputNumber min={0} />
                         </Form.Item>
                     </Col>
                 </Row>
@@ -266,91 +266,91 @@ const AddLine = () => {
                     </Col>
                     <Col span={12}>
                         <Form.Item label="管线亚级类" name="sub_level_type">
-                            <Input/>
+                            <Input />
                         </Form.Item>
                     </Col>
                 </Row>
                 <Row gutter={16}>
                     <Col span={12}>
                         <Form.Item label="材质" name="material">
-                            <Input/>
+                            <Input />
                         </Form.Item>
                     </Col>
                     <Col span={12}>
                         <Form.Item label="埋设方式" name="burial_way">
-                            <Input/>
+                            <Input />
                         </Form.Item>
                     </Col>
                 </Row>
                 <Row gutter={16}>
                     <Col span={12}>
                         <Form.Item label="管径" name="diameter">
-                            <InputNumber/>
+                            <InputNumber />
                         </Form.Item>
                     </Col>
                     <Col span={12}>
                         <Form.Item label="埋设年代" name="burial_year">
-                            <InputNumber min={1900}/>
+                            <InputNumber min={1900} />
                         </Form.Item>
                     </Col>
                 </Row>
                 <Row gutter={16}>
                     <Col span={12}>
                         <Form.Item label="权属单位" name="ownership">
-                            <Input/>
+                            <Input />
                         </Form.Item>
                     </Col>
                     <Col span={12}>
                         <Form.Item label="所在道路" name="road_where">
-                            <Input/>
+                            <Input />
                         </Form.Item>
                     </Col>
                 </Row>
                 <Row gutter={16}>
                     <Col span={12}>
                         <Form.Item label="使用状态" name="use_state">
-                            <Input/>
+                            <Input />
                         </Form.Item>
                     </Col>
                     <Col span={12}>
                         <Form.Item label="探测日期" name="detection_date">
-                            <DatePicker placeholder="选择日期"/>
+                            <DatePicker placeholder="选择日期" />
                         </Form.Item>
                     </Col>
                 </Row>
                 <Row gutter={16}>
                     <Col span={12}>
                         <Form.Item label="探测单位" name="detection_unit">
-                            <Input/>
+                            <Input />
                         </Form.Item>
                     </Col>
                     <Col span={12}>
                         <Form.Item label="监理单位" name="supervisor_unit">
-                            <Input/>
+                            <Input />
                         </Form.Item>
                     </Col>
                 </Row>
                 <Row gutter={16}>
                     <Col span={12}>
                         <Form.Item label="状态" name="state">
-                            <Input/>
+                            <Input />
                         </Form.Item>
                     </Col>
                     <Col span={12}>
                         <Form.Item label="精度级别" name="precision_level">
-                            <Input/>
+                            <Input />
                         </Form.Item>
                     </Col>
                 </Row>
                 <Row gutter={16}>
                     <Col span={12}>
                         <Form.Item label="管线类型" name="type">
-                            <Input/>
+                            <Input />
                         </Form.Item>
                     </Col>
                     <Col span={12}>
                         <Form.Item label="备注" name="remark">
-                            <Input.TextArea autoSize={{minRows: 1}}/>
+                            <Input.TextArea autoSize={{ minRows: 1 }} />
                         </Form.Item>
                     </Col>
                 </Row>
@@ -362,7 +362,7 @@ const AddLine = () => {
                         <Button onClick={() => {
                             history.push({
                                 pathname: '/ProjectManage/LineList',
-                                state: {project_id: location.state.project_id, initialization: true}
+                                state: { project_id: location.state.project_id, initialization: true }
                             })
                         }}>
                             返回
