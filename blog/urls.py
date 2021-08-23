@@ -23,4 +23,5 @@ urlpatterns = [
     path('auto_detection/', views.auto_detection),
     path('cancel_auto_detection/', views.cancel_auto_detection),
     path('get_progress/', views.get_progress),
+    path('get_home_statistic/', views.get_home_statistic)
 ]

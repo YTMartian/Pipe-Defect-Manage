@@ -7,7 +7,6 @@ blog/unet/unet_model.h5
 frontend/node_modules
 frontend/.eslintcache
 frontend/build
-template.docx
 final.docx
 misc/
 __pycache__/

@@ -527,6 +527,18 @@ def get_report(request, project_id):
         res['code'] = 1
     return JsonResponse(res)
 
+@csrf_exempt
+@require_http_methods(['GET'])
+def get_home_statistic(request):
+    res = {}
+    try:
+
+    except Exception as e:
+        error_line = e.__traceback__.tb_lineno  # 出错行数
+        res['msg'] = str(repr(e)) + ' line({})'.format(error_line)
+        res['code'] = 1
+    return JsonResponse(res)
+
 
 # 如果defect_type_id在[1,2,4,6,7,10,11,13,14,15]中,则为结构性缺陷.
 structure_defect_types = ['AJ', 'BX', 'CK', 'CR', 'FS', 'PL', 'QF', 'SL', 'TJ', 'TL']
