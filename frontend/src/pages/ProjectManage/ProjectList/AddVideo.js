@@ -62,7 +62,7 @@ const AddVideo = () => {
   const [form] = Form.useForm(); //对表单数据域进行交互
   const [dirForm] = Form.useForm();
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [videoName, setVideoName] = useState("");
+  // const [videoName, setVideoName] = useState("");
   const [lineOption, setLineOption] = useState(undefined);
   const [fileList, setFileList] = useState([]);
   const [isAddNewVideo, setIsAddNewVideo] = useState(true);
@@ -239,7 +239,7 @@ const AddVideo = () => {
       video_names = video_names.slice(0, -1);
       full_paths = full_paths.slice(0, -1);
     }
-    setVideoName(video_names);
+    // setVideoName(video_names);
     form.setFieldsValue({
       name: video_names,
       path: full_paths,
@@ -271,7 +271,7 @@ const AddVideo = () => {
           video_names = video_names.slice(0, -1);
           full_paths = full_paths.slice(0, -1);
         }
-        setVideoName(video_names);
+        // setVideoName(video_names);
         form.setFieldsValue({
           name: video_names,
           path: full_paths,
