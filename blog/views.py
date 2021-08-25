@@ -38,25 +38,6 @@ matplotlib.rc("font", **font)
 
 @csrf_exempt
 @require_http_methods(['POST'])
-def add_project(request):
-    res = {}
-    try:
-        data = json.loads(request.body.decode('utf-8'))
-        if data['isEdit']:
-            models.Project.objects.filter(project_id=data['project_id']).update(**data['values'])
-        else:
-            models.Project.objects.create(**data['values'])
-        res['msg'] = 'success'
-        res['code'] = 0
-    except Exception as e:
-        error_line = e.__traceback__.tb_lineno  # 出错行数
-        res['msg'] = str(repr(e)) + ' line({})'.format(error_line)
-        res['code'] = 1
-    return JsonResponse(res)
-
-
-@csrf_exempt
-@require_http_methods(['POST'])
 def get_project(request):
     res = {}
     try:
@@ -68,6 +49,8 @@ def get_project(request):
         elif data['condition'] == 'project_id':
             projects = models.Project.objects.filter(project_id=data['project_id'])
         res['list'] = json.loads(serializers.serialize('json', projects))
+        for i in range(len(res['list'])):
+            res['list'][i]['fields']['staff'] = res['list'][i]['fields']['staff'][1:-1]  # 去掉中括号
         res['msg'] = 'success'
         res['code'] = 0
     except Exception as e:
@@ -85,6 +68,26 @@ def delete_project(request):
         data = json.loads(request.body.decode('utf-8'))
         for project_id in data['project_ids']:
             models.Project.objects.filter(project_id=project_id).delete()
+        res['msg'] = 'success'
+        res['code'] = 0
+    except Exception as e:
+        error_line = e.__traceback__.tb_lineno  # 出错行数
+        res['msg'] = str(repr(e)) + ' line({})'.format(error_line)
+        res['code'] = 1
+    return JsonResponse(res)
+
+
+@csrf_exempt
+@require_http_methods(['POST'])
+def add_project(request):
+    res = {}
+    try:
+        data = json.loads(request.body.decode('utf-8'))
+        data['values']['staff'] = str(data['values']['staff'])
+        if data['isEdit']:
+            models.Project.objects.filter(project_id=data['project_id']).update(**data['values'])
+        else:
+            models.Project.objects.create(**data['values'])
         res['msg'] = 'success'
         res['code'] = 0
     except Exception as e:
@@ -283,6 +286,75 @@ def add_video(request):
                     res['msg'] = str(repr(e)) + '(添加视频{}失败)'.format(names[i])
                     res['code'] = 1
                     return JsonResponse(res)
+        res['msg'] = 'success'
+        res['code'] = 0
+    except Exception as e:
+        error_line = e.__traceback__.tb_lineno  # 出错行数
+        res['msg'] = str(repr(e)) + ' line({})'.format(error_line)
+        res['code'] = 1
+    return JsonResponse(res)
+
+
+@csrf_exempt
+@require_http_methods(['POST'])
+def get_staff(request):
+    res = {}
+    try:
+        data = json.loads(request.body.decode('utf-8'))
+        staffs = None
+        if data['condition'] == 'all':
+            staffs = models.Staff.objects.all().order_by('-staff_id')
+        elif data['condition'] == 'staff_id':
+            staffs = models.Staff.objects.filter(staff_id=data['staff_id'])
+        res['list'] = json.loads(serializers.serialize('json', staffs))
+        res['msg'] = 'success'
+        res['code'] = 0
+    except Exception as e:
+        error_line = e.__traceback__.tb_lineno  # 出错行数
+        res['msg'] = str(repr(e)) + ' line({})'.format(error_line)
+        res['code'] = 1
+    return JsonResponse(res)
+
+
+@csrf_exempt
+@require_http_methods(['POST'])
+def delete_staff(request):
+    res = {}
+    try:
+        data = json.loads(request.body.decode('utf-8'))
+        projects = models.Project.objects.all()
+        projects = json.loads(serializers.serialize('json', projects))
+        for staff_id in data['staff_ids']:
+            for i in projects:
+                if len(i['fields']['staff']) < 2 or i['fields']['staff'][0] != '[' or i['fields']['staff'][-1] != ']':
+                    continue
+                t = eval(i['fields']['staff'])
+                if staff_id in t:
+                    res['msg'] = '该负责人已有工程'
+                    res['code'] = 1
+                    return JsonResponse(res)
+            models.Staff.objects.filter(staff_id=staff_id).delete()
+        res['msg'] = 'success'
+        res['code'] = 0
+    except Exception as e:
+        error_line = e.__traceback__.tb_lineno  # 出错行数
+        res['msg'] = str(repr(e)) + ' line({})'.format(error_line)
+        res['code'] = 1
+    return JsonResponse(res)
+
+
+@csrf_exempt
+@require_http_methods(['POST'])
+def add_staff(request):
+    res = {}
+    try:
+        data = json.loads(request.body.decode('utf-8'))
+        if data['isEdit']:
+            models.Staff.objects.filter(staff_id=data['staff_id']).update(**data['values'])
+        else:
+            new_staff = models.Staff.objects.create(**data['values'])
+            res['pk'] = new_staff.pk
+            res['list'] = json.loads(serializers.serialize('json', [new_staff]))
         res['msg'] = 'success'
         res['code'] = 0
     except Exception as e:

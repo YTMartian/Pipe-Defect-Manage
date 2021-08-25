@@ -14,6 +14,9 @@ urlpatterns = [
     path('get_video/', views.get_video),
     path('delete_video/', views.delete_video),
     path('add_video/', views.add_video),
+    path('get_staff/', views.get_staff),
+    path('delete_staff/', views.delete_staff),
+    path('add_staff/', views.add_staff),
     path('get_video_stream/<str:path>/', views.get_video_stream),
     path('get_defect_grade/', views.get_defect_grade),
     path('get_defect/', views.get_defect),
@@ -23,5 +26,5 @@ urlpatterns = [
     path('auto_detection/', views.auto_detection),
     path('cancel_auto_detection/', views.cancel_auto_detection),
     path('get_progress/', views.get_progress),
-    path('get_home_statistic/', views.get_home_statistic)
+    path('get_home_statistic/', views.get_home_statistic),
 ]

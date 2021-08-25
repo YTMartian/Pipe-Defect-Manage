@@ -1,5 +1,5 @@
 from django.db import models
-from django.db.models import IntegerField, FloatField, AutoField, ForeignKey, CharField, DateTimeField
+from django.db.models import IntegerField, FloatField, AutoField, ForeignKey, CharField, PositiveIntegerField
 from django.core.validators import MaxValueValidator, MinValueValidator
 
 
@@ -17,9 +17,11 @@ class DefectGrade(models.Model):
 
 
 class Staff(models.Model):
-    staff_id = IntegerField(primary_key=True, auto_created=True)
+    staff_id = AutoField(primary_key=True, auto_created=True)
     staff_name = CharField(default='', max_length=50)
-    staff_category = CharField(default='', max_length=50)
+    gender = IntegerField(default=0, validators=[MaxValueValidator(1), MinValueValidator(0)])  # 0-男 1-女
+    age = PositiveIntegerField(default=0)
+    unit = CharField(default='', max_length=50)  # 单位
 
 
 class Regional(models.Model):
@@ -39,7 +41,7 @@ class Project(models.Model):
     project_no = CharField(default='', max_length=50)
     project_name = CharField(default='', max_length=50)
     project_address = CharField(default='', max_length=50)
-    staff = CharField(default='', max_length=50)
+    staff = CharField(default='[]', max_length=50)  # 记录staff_id数组，默认空数组[]
     start_date = CharField(default='', max_length=50)
     report_no = CharField(default='', max_length=50)
     requester_unit = CharField(default='', max_length=50)
@@ -53,6 +55,7 @@ class Project(models.Model):
     dredging = CharField(default='', max_length=50)
     detection_equipment = CharField(default='', max_length=50)
     detection_method = CharField(default='', max_length=50)
+    description = CharField(default='', max_length=50)
 
 
 class Line(models.Model):
