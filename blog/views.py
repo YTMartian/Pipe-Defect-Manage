@@ -51,6 +51,10 @@ def get_project(request):
         res['list'] = json.loads(serializers.serialize('json', projects))
         for i in range(len(res['list'])):
             res['list'][i]['fields']['staff'] = res['list'][i]['fields']['staff'][1:-1]  # 去掉中括号
+            res['list'][i]['fields']['line_count'] = models.Line.objects.filter(
+                project_id=res['list'][i]['pk']).count()
+            res['list'][i]['fields']['video_count'] = models.Video.objects.filter(
+                project_id=res['list'][i]['pk']).count()
         res['msg'] = 'success'
         res['code'] = 0
     except Exception as e:
@@ -233,6 +237,9 @@ def get_video(request):
         elif data['condition'] == 'video_id':
             videos = models.Video.objects.filter(video_id=data['video_id'])
         res['list'] = json.loads(serializers.serialize('json', videos))
+        for i in range(len(res['list'])):
+            res['list'][i]['fields']['defect_count'] = models.Defect.objects.filter(
+                video_id=res['list'][i]['pk']).count()
         res['msg'] = 'success'
         res['code'] = 0
     except Exception as e:
@@ -305,7 +312,7 @@ def get_staff(request):
         if data['condition'] == 'all':
             staffs = models.Staff.objects.all().order_by('-staff_id')
         elif data['condition'] == 'staff_id':
-            staffs = models.Staff.objects.filter(staff_id=data['staff_id'])
+            staffs = models.Staff.objects.filter(staff_id__in=data['staff_id'])  # 获取值在一个区间里的所有行
         res['list'] = json.loads(serializers.serialize('json', staffs))
         res['msg'] = 'success'
         res['code'] = 0

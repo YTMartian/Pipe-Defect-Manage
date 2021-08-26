@@ -347,7 +347,7 @@ const AddProject = () => {
                 <Row gutter={16}>
                     <Col span={12}>
                         <Form.Item label="描述" name="description">
-                            <TextArea rows={3}/>
+                            <TextArea  autoSize={{minRows: 1}}/>
                         </Form.Item>
                     </Col>
                 </Row>

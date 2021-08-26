@@ -12,7 +12,10 @@ import {
     Tooltip,
     DatePicker,
     Select,
-    Tag
+    Tag,
+    Row,
+    Col,
+    Badge
 } from 'antd';
 
 const {Search} = Input;
@@ -40,6 +43,7 @@ const ProjectList = () => {
         }).then(function (response) {
             if (response.data.code === 0) {
                 let newData = [];
+                let count = 0;
                 for (let i = 0; i < response.data.list.length; i++) {
                     newData.push({
                         key: response.data.list[i]['pk'],
@@ -48,10 +52,20 @@ const ProjectList = () => {
                         staff: response.data.list[i]['fields']['staff'],
                         start_date: response.data.list[i]['fields']['start_date'],
                         report_no: response.data.list[i]['fields']['report_no'],
-                        description: response.data.list[i]['fields']['description']
+                        description: response.data.list[i]['fields']['description'],
+                        line_count:response.data.list[i]['fields']['line_count'],
+                        video_count:response.data.list[i]['fields']['video_count'],
+                    });
+                    const res = getStaff(newData[i].staff);
+                    res.then(data => {
+                        newData[i].staff = (<Row>{data}</Row>);
+                        console.log(data)
+                        count += 1;
+                        if (count === response.data.list.length) {//staff全部获取完后才更新
+                            setData({currentData: newData, allData: newData});
+                        }
                     });
                 }
-                setData({currentData: newData, allData: newData});
             } else {
                 message.error('获取失败1:' + response.data.msg, 3)
             }
@@ -62,6 +76,48 @@ const ProjectList = () => {
     if (initialization) {
         getProject();
         setInitialization(false);
+    }
+
+    function getStaff(str) {
+        let staff_ids = [];
+        try {
+            const strList = str.split(",");
+            staff_ids = strList.map(Number);
+        } catch (error) {
+            message.error('获取staff失败7:' + error);
+        }
+        const res = request({//这里获得的并不是返回的数组而是Promise
+            method: 'post',
+            url: 'get_staff/',
+            data: {
+                "condition": "staff_id",
+                "staff_id": staff_ids
+            },
+        }).then(function (response) {
+            if (response.data.code === 0) {
+                let cols = [];
+                for (let i = 0; i < response.data.list.length; i++) {
+                    let staff_name = response.data.list[i]["fields"]["staff_name"];
+                    cols.push(<Col><Tag style={{marginRight: 3, fontSize: 15}}
+                                        color="cyan">{staff_name}</Tag></Col>);
+                }
+
+                return cols;
+            } else {
+                message.error('获取staff失败5:' + response.data.msg, 3);
+                return [];
+            }
+        }).catch(function (error) {
+            message.error('获取staff失败6:' + error);
+            return [];
+        });
+        // let ans = [];
+        // let p = 111;
+        // const t =  res.then(data => {//获取Promise的数据
+        //     console.log(p)
+        //     return data;
+        // })
+        return res;
     }
 
     const handleDelete = (selectedRowKeys) => {
@@ -209,16 +265,13 @@ const ProjectList = () => {
                 showTitle: false,
             },
             align: "center",
-            render: staff => (
-                <>
-                    <Tag color='green' style={{marginRight: 3, fontSize: 15}}>
-                        张三
-                    </Tag>
-                    <Tag color='green' style={{marginRight: 3, fontSize: 15}}>
-                        李四
-                    </Tag>
-                </>
-            ),
+            // render: (text, record, index) => {
+            //     return (
+            //         <Row>
+            //             {getStaff(record.staff)}
+            //         </Row>
+            //     )
+            // },
         },
         {
             title: '开工日期',
@@ -261,34 +314,48 @@ const ProjectList = () => {
         {
             title: "管线",
             dataIndex: "Line",
-            width: "7%",
+            width: "10%",
             align: "center",
             render: (_, record) => (
                 // eslint-disable-next-line jsx-a11y/anchor-is-valid,no-script-url
-                <a href="javascript:" onClick={() => history.push({
-                    pathname: '/ProjectManage/LineList',
-                    state: {project_id: record.key, initialization: true}
-                })}>管线</a>
+                <Badge count={record.line_count}
+                       offset={[13, -7]}
+                       size="small"
+                       style={{backgroundColor: '#52c41a'}}
+                       showZero={false}
+                >
+                    <a href="javascript:" onClick={() => history.push({
+                        pathname: '/ProjectManage/LineList',
+                        state: {project_id: record.key, initialization: true}
+                    })}>管线</a>
+                </Badge>
             )
         },
         {
             title: '视频',
             dataIndex: 'video',
             align: "center",
-            width: "7%",
+            width: "10%",
             render:
                 (_, record) =>
                     // eslint-disable-next-line jsx-a11y/anchor-is-valid,no-script-url
-                    <a href="javascript:" onClick={() => history.push({
-                        pathname: '/ProjectManage/VideoList',
-                        state: {project_id: record.key, initialization: true}
-                    })}>视频</a>
+                    <Badge count={record.video_count}
+                           offset={[13, -7]}
+                           size="small"
+                           style={{backgroundColor: '#52c41a'}}
+                           showZero={false}
+                    >
+                        <a href="javascript:" onClick={() => history.push({
+                            pathname: '/ProjectManage/VideoList',
+                            state: {project_id: record.key, initialization: true}
+                        })}>视频</a>
+                    </Badge>
         },
         {
             title: '报告',
             dataIndex: 'report',
             align: "center",
-            width: "7%",
+            width: "10%",
             render:
                 (_, record) =>
                     // eslint-disable-next-line jsx-a11y/anchor-is-valid,no-script-url,react/jsx-no-target-blank
