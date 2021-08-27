@@ -625,6 +625,7 @@ def get_home_statistic(request):
             'project_statistic': [],
             'video_statistic': [],
             'defect_statistic': [],
+            'defect_detail': []
         }
         # 统计时间和数目
         temp = {}
@@ -658,6 +659,9 @@ def get_home_statistic(request):
             data['defect_statistic'].append({'time': key, 'count': temp[key]})
         data['defect_statistic'] = data['defect_statistic'][-100:]  # 只提取后一百个
         # data['defect_statistic']=sorted(data['defect_statistic'], key=lambda x: -x['count']) #降序
+        # 统计缺陷详细信息
+        for i in range(1, 17):  # 一共16类缺陷
+            data['defect_detail'].append(models.Defect.objects.filter(defect_type_id=i).count())
         res['data'] = data
         res['msg'] = 'success'
         res['code'] = 0

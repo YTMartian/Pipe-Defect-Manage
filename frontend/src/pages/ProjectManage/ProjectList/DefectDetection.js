@@ -288,7 +288,7 @@ const DefectDetection = () => {
                     message.error('删除失败：' + response.data.msg, 3)
                 }
             }).catch(function (error) {
-                message.error('删除失败：', error, 3);
+                message.error('删除失败：' + error, 3);
             });
         };
 
