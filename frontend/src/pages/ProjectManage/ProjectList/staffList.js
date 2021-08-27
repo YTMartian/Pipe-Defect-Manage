@@ -85,7 +85,7 @@ const StaffEditableTable = () => {
                 message.error('获取staff失败1:' + response.data.msg, 3)
             }
         }).catch(function (error) {
-            message.error('获取staff失败2:' + error);
+            message.error('获取staff失败2:' + error, 3);
         });
     };
     if (initialization) {
@@ -206,7 +206,7 @@ const StaffEditableTable = () => {
                 message.error('修改staff失败3:', 3);
             }
         } catch (errInfo) {
-            message.error('修改staff失败4:', errInfo);
+            message.error('修改staff失败4:' + errInfo, 3);
         }
     };
 

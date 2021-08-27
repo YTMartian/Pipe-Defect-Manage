@@ -114,6 +114,9 @@ def get_line(request):
         elif data['condition'] == 'line_id':
             lines = models.Line.objects.filter(line_id=data['line_id'])
         res['list'] = json.loads(serializers.serialize('json', lines))
+        for i in range(len(res['list'])):
+            res['list'][i]['fields']['point_count'] = models.Point.objects.filter(
+                line_id=res['list'][i]['pk']).count()
         res['msg'] = 'success'
         res['code'] = 0
     except Exception as e:
@@ -628,7 +631,7 @@ def get_home_statistic(request):
         for project in projects:
             if str(project.start_date) == 0: continue
             if str(project.start_date) in temp:
-                temp[str(project.start_data)] += 1
+                temp[str(project.start_date)] += 1
             else:
                 temp[str(project.start_date)] = 1
         for key in temp:
@@ -915,7 +918,7 @@ def get_videos(project_id):
         data['detection_direction'] = '顺流' if video.line_id.flow_direction == 0 else '逆流'
         data['pipe_length'] = video.line_id.total_length
         data['detection_length'] = video.line_id.detection_length
-        data['staff_name'] = video.project_id.staff
+        data['staff_name'] = get_staff_names(video.project_id.staff)
         data['road_name'] = video.line_id.road_where
         data['record_date'] = video.record_date
         data['video_remark'] = video.remark
@@ -1163,6 +1166,21 @@ def get_summary(pipes):
     return summary
 
 
+# 根据staff_id（如[1,2,3]）获取姓名
+def get_staff_names(s: str) -> str:
+    try:
+        staff_ids = eval(s);
+        staff_names = []
+        for staff_id in staff_ids:
+            staff_name = models.Staff.objects.get(staff_id=staff_id).staff_name
+            staff_names.append(staff_name)
+        print(staff_names)
+        return '、'.join(staff_names)
+    except Exception as e:
+        error_line = e.__traceback__.tb_lineno  # 出错行数
+        raise Exception(str(e) + ' line({})'.format(error_line))
+
+
 def generate_report(project_id):
     global doc
     if os.path.exists('final.docx'):
@@ -1183,7 +1201,7 @@ def generate_report(project_id):
         'project_address': project.project_address, 'requester_unit': project.requester_unit,
         'supervisory_unit': project.supervisory_unit, 'construction_unit': project.construction_unit,
         'design_unit': project.design_unit, 'build_unit': project.build_unit,
-        'report_no': project.report_no, 'staff_name': project.staff,
+        'report_no': project.report_no, 'staff_name': get_staff_names(project.staff),
         'current_year': datetime.datetime.today().year,
         'current_month': datetime.datetime.today().month,
         'current_day': datetime.datetime.today().day, 'start_record_date': project.start_date,

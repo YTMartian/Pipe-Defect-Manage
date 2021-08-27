@@ -1,11 +1,17 @@
 import React, {useState} from "react";
 import request from "../../request"
 import 'antd/dist/antd.css';
-import {message, Col, Row} from "antd";
 import {ChartCard, MiniArea} from 'ant-design-pro/lib/Charts';
 import moment from 'moment';
 import {useLocation} from "react-router-dom";
 import 'ant-design-pro/dist/ant-design-pro.css';
+import {
+    message,
+    Col,
+    Row,
+    Card
+} from "antd";
+
 message.config({
     top: 150
 });
@@ -18,6 +24,7 @@ const Home = () => {
     const [videoCount, setVideoCount] = useState(0);
     const [defectData, setDefectData] = useState([]);
     const [defectCount, setDefectCount] = useState(0);
+    const [statisticLoading, setStatisticLoading] = useState(true);
     const location = useLocation();
     if (!location.state) {
         location.state = true;
@@ -53,31 +60,34 @@ const Home = () => {
                     });
                 }
                 setDefectData(visitData3);
+                setStatisticLoading(false);
             } else {
-                message.error("获取统计失败1:" + response.data.msg, 3);
+                message.error("获取统计失败1:" + response.data.msg + '刷新重试', 3);
             }
         }).catch(function (error) {
-            message.error("获取统计失败2:" + error, 3);
+            message.error("获取统计失败2:" + error + '刷新重试', 3);
         });
     }
     return (
-        <Row gutter={16}>
-            <Col span={8}>
-                <ChartCard title="工程数量" total={projectCount} contentHeight={70}>
-                    <MiniArea line height={60} data={projectData}/>
-                </ChartCard>
-            </Col>
-            <Col span={8}>
-                <ChartCard title="视频数量" total={videoCount} contentHeight={70}>
-                    <MiniArea line height={60} data={videoData}/>
-                </ChartCard>
-            </Col>
-            <Col span={8}>
-                <ChartCard title="缺陷数量" total={defectCount} contentHeight={70}>
-                    <MiniArea line height={60} data={defectData}/>
-                </ChartCard>
-            </Col>
-        </Row>
+        <Card title="统计信息" bordered={true} loading={statisticLoading}>
+            <Row gutter={16}>
+                <Col span={8}>
+                    <ChartCard title="工程数量" total={projectCount} contentHeight={70}>
+                        <MiniArea line height={60} data={projectData}/>
+                    </ChartCard>
+                </Col>
+                <Col span={8}>
+                    <ChartCard title="视频数量" total={videoCount} contentHeight={70}>
+                        <MiniArea line height={60} data={videoData}/>
+                    </ChartCard>
+                </Col>
+                <Col span={8}>
+                    <ChartCard title="缺陷数量" total={defectCount} contentHeight={70}>
+                        <MiniArea line height={60} data={defectData}/>
+                    </ChartCard>
+                </Col>
+            </Row>
+        </Card>
     )
 };
 

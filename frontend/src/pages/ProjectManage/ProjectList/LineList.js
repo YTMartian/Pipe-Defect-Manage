@@ -1,9 +1,16 @@
 import {useHistory, useLocation} from "react-router-dom"
-import {Table, Button, Popconfirm, message} from 'antd'
 import request from "../../../request"
 import React, {useState} from "react"
 import 'antd/dist/antd.css'
 import './style.css'
+
+import {
+    Table,
+    Button,
+    Popconfirm,
+    message,
+    Badge
+} from 'antd'
 
 message.config({
     top: 150
@@ -35,7 +42,8 @@ const LineList = () => {
                         flow_direction: response.data.list[i]['fields']['flow_direction'],
                         material: response.data.list[i]['fields']['material'],
                         diameter: response.data.list[i]['fields']['diameter'],
-                        remark:response.data.list[i]['fields']['remark']
+                        remark: response.data.list[i]['fields']['remark'],
+                        point_count: response.data.list[i]['fields']['point_count']
                     });
                 }
                 setData({currentData: newData, allData: newData});
@@ -181,10 +189,17 @@ const LineList = () => {
             align: "center",
             render: (_, record) => (
                 // eslint-disable-next-line jsx-a11y/anchor-is-valid,no-script-url
-                <a href="javascript:" onClick={() => history.push({
-                    pathname: '/ProjectManage/PointList',
-                    state: {project_id: location.state.project_id, line_id: record.key, initialization: true}
-                })}>管点</a>
+                <Badge count={record.point_count}
+                       offset={[13, -7]}
+                       size="small"
+                       style={{backgroundColor: '#52c41a'}}
+                       showZero={false}
+                >
+                    <a href="javascript:" onClick={() => history.push({
+                        pathname: '/ProjectManage/PointList',
+                        state: {project_id: location.state.project_id, line_id: record.key, initialization: true}
+                    })}>管点</a>
+                </Badge>
             )
         },
         {

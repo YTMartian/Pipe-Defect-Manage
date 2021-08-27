@@ -3,7 +3,7 @@ import React from 'react'
 const GeneralSettings = () => {
   return (
     <>
-      设置
+      待开发
     </>
   )
 };

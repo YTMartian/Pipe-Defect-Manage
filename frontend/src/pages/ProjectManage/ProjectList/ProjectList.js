@@ -15,7 +15,8 @@ import {
     Tag,
     Row,
     Col,
-    Badge
+    Badge,
+    Spin
 } from 'antd';
 
 const {Search} = Input;
@@ -32,6 +33,7 @@ const ProjectList = () => {
     const [initialization, setInitialization] = useState(true);
     const [data, setData] = useState({currentData: [], allData: []});
     const [state, setState] = useState({selectedRowKeys: []});//使用state从而更改数据后能够实时更新
+    const [downloadFileSpin, setDownloadFileSpin] = useState({});//键为表格每行的key，值为是否spinning
 
     const getProject = () => {
         request({
@@ -53,24 +55,26 @@ const ProjectList = () => {
                         start_date: response.data.list[i]['fields']['start_date'],
                         report_no: response.data.list[i]['fields']['report_no'],
                         description: response.data.list[i]['fields']['description'],
-                        line_count:response.data.list[i]['fields']['line_count'],
-                        video_count:response.data.list[i]['fields']['video_count'],
+                        line_count: response.data.list[i]['fields']['line_count'],
+                        video_count: response.data.list[i]['fields']['video_count'],
                     });
                     const res = getStaff(newData[i].staff);
                     res.then(data => {
                         newData[i].staff = (<Row>{data}</Row>);
-                        console.log(data)
+                        // console.log(data)
+                        downloadFileSpin[newData[i].key] = false;
                         count += 1;
                         if (count === response.data.list.length) {//staff全部获取完后才更新
                             setData({currentData: newData, allData: newData});
+                            setDownloadFileSpin(downloadFileSpin);
                         }
                     });
                 }
             } else {
-                message.error('获取失败1:' + response.data.msg, 3)
+                message.error('获取失败1:' + response.data.msg +'刷新重试', 3)
             }
         }).catch(function (error) {
-            message.error('获取失败2:' + error);
+            message.error('获取失败2:' + error + '刷新重试', 3);
         });
     };
     if (initialization) {
@@ -108,7 +112,7 @@ const ProjectList = () => {
                 return [];
             }
         }).catch(function (error) {
-            message.error('获取staff失败6:' + error);
+            message.error('获取staff失败6:' + error, 3);
             return [];
         });
         // let ans = [];
@@ -139,7 +143,7 @@ const ProjectList = () => {
                 message.error('删除失败1:' + response.data.msg, 3)
             }
         }).catch(function (error) {
-            message.error('删除失败2:' + error);
+            message.error('删除失败2:' + error, 3);
         });
     };
 
@@ -180,6 +184,52 @@ const ProjectList = () => {
         console.log('selectedRowKeys changed: ', selectedRowKeys);
         setState({selectedRowKeys: selectedRowKeys});
     };
+
+    function handleDownload(url, fileName, key) {
+        //必须要先解构再set state，否则table里的值不会变
+        let newDownloadFileSpin = {...downloadFileSpin};
+        newDownloadFileSpin[key] = true;
+        // console.log(newDownloadFileSpin);
+        setDownloadFileSpin(newDownloadFileSpin);
+        fetch(url, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/msword',
+            },
+        }).then((response) => response.blob())
+            .then((blob) => {
+                //创建blob文件
+                const url = window.URL.createObjectURL(
+                    new Blob([blob]),
+                );
+                //生成a标签并设置属性
+                const link = document.createElement('a');
+                link.href = url;
+                link.setAttribute(
+                    'download',
+                    fileName + '.docx',
+                );
+                //插入a标签
+                document.body.appendChild(link);
+                //模拟点击开始下载
+                link.click();
+                //清除a标签
+                link.parentNode.removeChild(link);
+
+                newDownloadFileSpin = {...downloadFileSpin}
+                newDownloadFileSpin[key] = false;
+                setDownloadFileSpin(newDownloadFileSpin);
+                // console.log(newDownloadFileSpin);
+            })
+            .catch(function (error) {
+                message.error('下载失败1:' + error, 3);
+
+                newDownloadFileSpin = {...downloadFileSpin}
+                newDownloadFileSpin[key] = false;
+                setDownloadFileSpin(newDownloadFileSpin);
+            });
+        // console.log('fff')
+    }
 
     const {selectedRowKeys} = state;
     const rowSelection = {
@@ -359,8 +409,16 @@ const ProjectList = () => {
             render:
                 (_, record) =>
                     // eslint-disable-next-line jsx-a11y/anchor-is-valid,no-script-url,react/jsx-no-target-blank
-                    <a href={`${request.defaults.baseURL}get_report/${record.key}`}
-                       download={record.project_name}>报告</a>//使用download，这样返回的东西都以文件下载
+                    //使用download，这样返回的东西都以文件下载
+                    <Spin spinning={downloadFileSpin[record.key]}>
+                        {/*<a href={`${request.defaults.baseURL}get_report/${record.key}`}*/}
+                        {/*   download={record.project_name}>报告</a>*/}
+                        <Button type="link"
+                                onClick={() => handleDownload(
+                                    `${request.defaults.baseURL}get_report/${record.key}`,
+                                    record.project_name,
+                                    record.key)}>报告</Button>
+                    </Spin>
         },
     ];
     return (
