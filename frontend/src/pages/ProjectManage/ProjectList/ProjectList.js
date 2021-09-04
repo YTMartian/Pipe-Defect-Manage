@@ -34,6 +34,7 @@ const ProjectList = () => {
     const [data, setData] = useState({currentData: [], allData: []});
     const [state, setState] = useState({selectedRowKeys: []});//使用state从而更改数据后能够实时更新
     const [downloadFileSpin, setDownloadFileSpin] = useState({});//键为表格每行的key，值为是否spinning
+    const [projectListTableIsLoading, setProjectListTableIsLoading] = useState(true);
 
     const getProject = () => {
         request({
@@ -69,12 +70,14 @@ const ProjectList = () => {
                             setDownloadFileSpin(downloadFileSpin);
                         }
                     });
+                    setProjectListTableIsLoading(false);
                 }
             } else {
-                message.error('获取失败1:' + response.data.msg +'刷新重试', 3)
+                message.error('获取失败1:' + response.data.msg + '刷新重试', 3);
             }
         }).catch(function (error) {
-            message.error('获取失败2:' + error + '刷新重试', 3);
+            // message.error('获取失败2:' + error + '刷新重试', 3);
+            getProject();
         });
     };
     if (initialization) {
@@ -103,7 +106,7 @@ const ProjectList = () => {
                 for (let i = 0; i < response.data.list.length; i++) {
                     let staff_name = response.data.list[i]["fields"]["staff_name"];
                     cols.push(<Col><Tag style={{marginRight: 3, fontSize: 15}}
-                                        color="cyan">{staff_name}</Tag></Col>);
+                                        color="blue">{staff_name}</Tag></Col>);
                 }
 
                 return cols;
@@ -500,6 +503,7 @@ const ProjectList = () => {
                     triggerAsc: '点击升序',
                     triggerDesc: '点击降序'
                 }}
+                loading={projectListTableIsLoading}
             />
         </>
     );

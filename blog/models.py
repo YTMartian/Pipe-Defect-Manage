@@ -1,6 +1,7 @@
 from django.db import models
 from django.db.models import IntegerField, FloatField, AutoField, ForeignKey, CharField, PositiveIntegerField
 from django.core.validators import MaxValueValidator, MinValueValidator
+from django.core.exceptions import ValidationError
 
 
 class DefectType(models.Model):
@@ -139,3 +140,19 @@ class Defect(models.Model):
     defect_remark = CharField(default='', max_length=50)
     defect_date = CharField(default='', max_length=50)
     defect_attribute = CharField(default='', max_length=50)
+
+
+# 限制表格每页只可显示10，20，50或100条数据
+def validate_table_rows_per_page(self, value):
+    if value not in [10, 20, 50, 100]:
+        raise ValidationError('{} is not a legal value.'.format(value))
+
+
+class Setting(models.Model):
+    table_rows_per_page = IntegerField(default=10, validators=[validate_table_rows_per_page])
+
+    # 自定义save，限制表中只能有一条记录
+    def save(self, *args, **kwargs):
+        if Setting.objects.count() > 0:
+            raise Exception('too much rows, only ONE row is allowed.')
+        super(Setting, self).save(*args, **kwargs)

@@ -319,6 +319,9 @@ const StaffEditableTable = () => {
                     columns={mergedColumns}
                     pagination={{
                         onChange: cancel,
+                        defaultPageSize: 10,
+                        showTotal: total => `共 ${total} 条`,
+                        showSizeChanger: true,
                     }}
                 />
             </Form>
