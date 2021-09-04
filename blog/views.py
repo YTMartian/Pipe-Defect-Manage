@@ -11,6 +11,7 @@ import matplotlib.pyplot as plt
 from docx.shared import Mm
 from matplotlib import cm
 from . import models
+from . import tools
 import numpy as np
 import matplotlib
 import datetime

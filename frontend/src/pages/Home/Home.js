@@ -29,6 +29,10 @@ const Home = () => {
     const location = useLocation();
     if (!location.state) {
         location.state = true;
+        getHomeStatistic();
+    }
+
+    function getHomeStatistic() {
         request({
             method: "get",
             url: "get_home_statistic/",
@@ -79,7 +83,7 @@ const Home = () => {
                     {x: 'TL（脱落）', y: 0,},
                     {x: 'ZW（障碍物）', y: 0,}
                 ];
-                for(let i = 0; i < response.data.data.defect_detail.length; i++) {
+                for (let i = 0; i < response.data.data.defect_detail.length; i++) {
                     newDefectDetailData[i].y = response.data.data.defect_detail[i];
                 }
                 setDefectDetailData(newDefectDetailData);
@@ -88,7 +92,8 @@ const Home = () => {
                 message.error("获取统计失败1:" + response.data.msg + '刷新重试', 3);
             }
         }).catch(function (error) {
-            message.error("获取统计失败2:" + error + '刷新重试', 3);
+            // message.error("获取统计失败2:" + error + '刷新重试', 3);
+            getHomeStatistic();
         });
     }
 

@@ -2,7 +2,7 @@ const _nav = [
     {
         _tag: 'CSidebarNavItem',
         name: '主页',
-        to: '/Home/Home',
+        to: '/',
         icon: 'cil-home',
     },
     {
