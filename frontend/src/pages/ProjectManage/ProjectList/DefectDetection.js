@@ -18,10 +18,19 @@ import {
     Popconfirm,
     Slider,
     Modal,
-    Progress
+    Progress,
+    Drawer
 } from 'antd'
 
-import {CaretLeftFilled, CaretRightFilled} from '@ant-design/icons';
+import {
+    CaretLeftFilled,
+    CaretRightFilled,
+    ExclamationCircleOutlined
+} from '@ant-design/icons';
+import StaffEditableTable from "./staffList";
+import DefectDraw from "./DefectDraw";
+// import {Player} from 'video-react'
+// import 'video-react/dist/video-react.css'
 
 const {Option} = Select;
 
@@ -80,6 +89,12 @@ const DefectDetection = () => {
         const [marks, setMarks] = useState({});
         const [isModalVisible, setIsModalVisible] = useState(false);
         let getProgress;
+        const [drawVisible, setDrawVisible] = useState(false);
+        // const [drawCloseModalVisible, setDrawCloseModalVisible] = useState(false);
+        const [drawDefectId, setDrawDefectId] = useState(-1);
+        const defectDrawRef = useRef();//通过ref获取子组件的属性
+        const [drawImgData, setDrawImgData] = useState("");
+        let canvasRef = useRef();
 
         const setCurrentDefect = () => {
             let index = currentDefectIndex.current;
@@ -195,19 +210,23 @@ const DefectDetection = () => {
                         });
                         //如此一来动态更改video的src
                         //先url编码处理路径，防止\等字符造成url错误
-                        videoSrc.current = request.defaults.baseURL + 'get_video_stream/' + encodeURI(response.data.list[0]['fields']['path']);
-                        setMyVideo(<video
-                            controls
-                            ref={videoRef}
-                            onSeeking={onSeeking}
-                            className='video-style'
-                            onChange={() => {
-                                console.log('fuck')
-                            }}
-                            onCanPlayThrough={drawMarks}//视频加载完毕
-                        >
-                            <source src={videoSrc.current}/>
-                        </video>);
+                        //末尾加上斜杠/，这样video中的crossorigin = "anonymous"才能起作用，否则就是CORS.
+                        videoSrc.current = request.defaults.baseURL + 'get_video_stream/' + encodeURI(response.data.list[0]['fields']['path'] + '/');
+                        setMyVideo(
+                            <video
+                                controls
+                                ref={videoRef}
+                                onSeeking={onSeeking}
+                                className='video-style'
+                                onChange={() => {
+                                    console.log('fuck')
+                                }}
+                                onCanPlayThrough={drawMarks}//视频加载完毕
+                                crossorigin="anonymous"
+                            >
+                                <source src={videoSrc.current}/>
+                            </video>
+                        );
                     }
                 }).catch(function (error) {
                     message.error('获取视频失败:' + error, 3);
@@ -285,12 +304,64 @@ const DefectDetection = () => {
                     }
                     getAllDefects();
                 } else {
-                    message.error('删除失败：' + response.data.msg, 3)
+                    message.error('删除失败1：' + response.data.msg, 3)
                 }
             }).catch(function (error) {
-                message.error('删除失败：' + error, 3);
+                message.error('删除失败2：' + error, 3);
             });
         };
+
+        function openDraw() {
+            //先将视频置于这里
+            // videoRef.current.play();
+            videoRef.current.currentTime = timeToSeconds(allDefects.current[currentDefectIndex.current]['fields']['time_in_video']);
+            const canvas = document.createElement('canvas');
+            canvas.width = videoRef.current.videoWidth;
+            canvas.height = videoRef.current.videoHeight;
+            //防止图片过大过小
+            if (canvas.width < 500) {
+                canvas.width *= 2;
+                canvas.height *= 2;
+            } else if (canvas.width > 2000) {
+                canvas.width /= 1.5;
+                canvas.height /= 1.5;
+            }
+            canvas.getContext('2d').drawImage(videoRef.current, 0, 0, canvas.width, canvas.height); // 绘制canvas
+            let dataURL = canvas.toDataURL('image/png'); //从画布上获取图片数据转换为base64
+            setDrawImgData(dataURL);
+            setDrawDefectId(allDefects.current[currentDefectIndex.current]['pk']);
+            setDrawVisible(true);
+            // console.log(videoRef.current.readyState)
+            videoRef.current.pause();
+        }
+
+        function closeDraw() {
+            if (defectDrawRef.current.state.hasSaved === true) {//获取子组件的属性
+                setDrawVisible(false);
+            } else {//如果未保存绘制的图形
+                Modal.confirm({
+                    title: '放弃修改？',
+                    icon: <ExclamationCircleOutlined/>,
+                    onOk: drawCloseModalOk,
+                    onCancel: drawCloseModalCancel,
+                    okText: "是",
+                    cancelText: "否",
+                    centered: true,
+                    okButtonProps: {danger: true},
+                    cancelButtonProps: {type: "primary"},
+                });
+            }
+        }
+
+        //放弃修改
+        function drawCloseModalOk() {
+            setDrawVisible(false);
+        }
+
+        function drawCloseModalCancel() {
+            // defectDrawRef.current.save();
+            // setDrawVisible(false);
+        }
 
         const onFinish = (values) => {
             values.video_id = location.state.video_id;
@@ -308,10 +379,10 @@ const DefectDetection = () => {
                     message.success('修改成功', 3);
                     getAllDefects();
                 } else {
-                    message.error('修改失败:' + response.data.msg, 3)
+                    message.error('修改失败1:' + response.data.msg, 3)
                 }
             }).catch(function (error) {
-                message.error(error);
+                message.error('修改失败2:' + error, 2);
             });
         };
 
@@ -553,8 +624,8 @@ const DefectDetection = () => {
                 <div style={{float: "right", width: "40%", height: "100%"}}>
                     <Affix offsetTop={100}>
                         <Card>
-                            <Row gutter={30} justify="center">
-                                <Col span={5}>
+                            <Row gutter={24} justify="center">
+                                <Col span={4}>
                                     <Button
                                         size="large"
                                         onClick={() => {
@@ -570,17 +641,22 @@ const DefectDetection = () => {
                                 <Col span={3}>
                                     <Button size="large" icon={<CaretLeftFilled/>} onClick={previousDefect}/>
                                 </Col>
-                                <Col span={5}>
+                                <Col span={4}>
                                     <Button size="large" type="primary" onClick={handleAdd}>
                                         标记
                                     </Button>
                                 </Col>
-                                <Col span={5}>
+                                <Col span={4}>
                                     <Popconfirm title="确定删除?" onConfirm={handleDelete} disabled={deleteDisable}>
                                         <Button size="large" danger type="primary">
                                             删除
                                         </Button>
                                     </Popconfirm>
+                                </Col>
+                                <Col span={4}>
+                                    <Button size="large" type="primary" onClick={openDraw} disabled={deleteDisable}>
+                                        绘制
+                                    </Button>
                                 </Col>
                                 <Col span={4}>
                                     <Button size="large" icon={<CaretRightFilled/>} onClick={nextDefect}/>
@@ -662,6 +738,22 @@ const DefectDetection = () => {
                         </Modal>
                     </Card>
                 </div>
+                <Drawer
+                    width="60%"
+                    visible={drawVisible}
+                    onClose={closeDraw}
+                    closable={false}
+                    keyboard={true}
+                    drawerStyle={{paddingTop: '10%'}}
+                    destroyOnClose={true}
+                >
+                    <DefectDraw
+                        defectId={drawDefectId}
+                        imgData={drawImgData}
+                        //通过ref，使父组件调用子组件里的方法和属性
+                        ref={defectDrawRef}
+                    />
+                </Drawer>
             </Card>
         )
     }

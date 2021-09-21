@@ -48,3 +48,11 @@ video::-webkit-media-controls-volume-slider {
 /*所有控件*/
 video::-webkit-media-controls-enclosure {
 }
+
+/*设置不可选中*/
+.can-not-select {
+    -webkit-user-select: none;
+    -moz-user-select:none;
+    -o-user-select:none;
+    -ms-user-select:none;
+}
