@@ -34,7 +34,7 @@ def myRun(cmd):
 
 def main2():
     server_process = subprocess.Popen(['cscript.exe', "start.vbs"])
-    browser_process = subprocess.Popen('./frontend/build/release/browser-win32-x64/browser.exe')
+    browser_process = subprocess.Popen('./browser-win32-x64/browser.exe')
     while True:
         # 获取进程状态，None表示还在运行.
         poll = browser_process.poll()
