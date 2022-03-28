@@ -480,6 +480,8 @@ const DefectDetection = () => {
         };
 
         const handleAuto = () => {
+            message.info("功能待开发", 3)
+            return
             videoRef.current.pause();
             setIsModalVisible(true);
             setProgress(0);

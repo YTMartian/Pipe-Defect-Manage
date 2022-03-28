@@ -24,10 +24,18 @@
 - sqlite3
 - pyinstaller
 
+#### 打包发布
+
+- manage.spec: pyinstaller manage.spec
+
+- generate react exe: [frontend/electron/readme.md](frontend/electron/readme.md)
+
 #### 其它
 
-start.bat & start.vbs: 运行django并隐藏CMD窗口
+- 因浏览器安全限制，部分功能需electron打包才能使用。
 
-manage.spec: pyinstaller manage.spec
+- 运行django并隐藏CMD窗口：start.bat & start.vbs 
 
-generate react exe: [frontend/electron/readme.md](frontend/electron/readme.md)
+#### 更新日志
+
+`2022-`:不再需要手动输入文件路径

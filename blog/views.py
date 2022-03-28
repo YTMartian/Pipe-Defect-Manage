@@ -11,7 +11,6 @@ import matplotlib.pyplot as plt
 from docx.shared import Mm
 from matplotlib import cm
 from . import models
-from . import tools
 import numpy as np
 import matplotlib
 import datetime
@@ -21,9 +20,6 @@ import time
 import os
 import cv2
 
-from keras import backend as K
-from .unet.unet import unet_F_B_A
-from .unet.data_loader import get_image_array
 
 os.environ['CUDA_VISIBLE_DEVICES'] = '/gpu:0'
 
@@ -560,7 +556,6 @@ output_height = input_height
 output_width = input_width
 # 正常，暗接，错口，破裂，渗漏
 colors = [(0, 0, 0), (249, 7, 30), (4, 234, 255), (0, 0, 255), (155, 231, 64)]  # (b,g,r)
-IMAGE_ORDERING = K.image_data_format()
 
 
 @csrf_exempt
@@ -584,46 +579,11 @@ def auto_detection(request):
         interval = 5  # 间隔5秒
         count = fps * interval
         ans = []  # 记录所有缺陷
-        model = unet_F_B_A(n_classes, input_height = input_height, input_width = input_width)
-        model.load_weights('blog/unet/unet_model.h5')
+        model = None
+        # model.load_weights('blog/unet/unet_model.h5')
         defect_type_id = [1, 4, 10, 13]  # 对应的缺陷类别id  暗接，错口，破裂，渗漏
         defect_grade_id = [1, 12, 33, 45]  # 对应的第一个缺陷级别id
         while not cancel_auto and count < total_count:
-            cap.set(cv2.CAP_PROP_POS_FRAMES, count)
-            flag, img = cap.read()
-            if flag:
-                x = get_image_array(img, input_width, input_height, ordering = IMAGE_ORDERING)
-                pr = model.predict(np.array([x]))[0]
-                pr = pr.reshape((output_height, output_width, n_classes)).argmax(
-                        axis = 2)  # shape=(input_height,input_width)
-                
-                # 统计各个值的个数
-                total = output_height * output_width
-                mask = np.unique(pr)  # [0,1,2,3,4]
-                temp = {}
-                for i in mask:
-                    temp[i] = np.sum(pr == i) / total
-                index = 0
-                max_ = 0
-                threshold = 0.03  # 当该缺陷像素占比超过阈值时，才认为存在该缺陷
-                for i in range(1, 5):
-                    if i in temp and temp[i] > threshold and temp[i] > max_:  # 只选取最大缺陷
-                        index = i
-                        max_ = temp[i]
-                if index != 0:  # 存在缺陷
-                    t = {
-                        'video_id'       : models.Video.objects.get(video_id = data['video_id']),
-                        'defect_type_id' : models.DefectType.objects.get(defect_type_id = defect_type_id[index - 1]),
-                        'defect_grade_id': models.DefectGrade.objects.get(defect_grade_id = defect_grade_id[index - 1])
-                    }
-                    seconds = int(count / fps)
-                    hour = int(seconds / 3600)
-                    seconds -= hour * 3600
-                    minute = int(seconds / 60)
-                    seconds -= minute * 60
-                    second = seconds
-                    t['time_in_video'] = '{:02d}:{:02d}:{:02d}'.format(hour, minute, second)
-                    ans.append(t.copy())
             time.sleep(1)
             count += fps * interval  # 每隔一定间隔读取一帧
             progress = int(100 * count / total_count)
