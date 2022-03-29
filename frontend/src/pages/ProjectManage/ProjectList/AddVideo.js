@@ -1,6 +1,6 @@
 import {useHistory, useLocation} from "react-router-dom";
 import request from "../../../request";
-import React, {useState} from "react";
+import React, {useState, useRef} from "react";
 import "antd/dist/antd.css";
 import moment from "moment";
 import {
@@ -15,7 +15,8 @@ import {
     Row,
     Col,
     Upload,
-    Modal, Breadcrumb,
+    Modal,
+    Breadcrumb,
 } from "antd";
 
 const {Option} = Select;
@@ -64,7 +65,7 @@ const AddVideo = () => {
     // const [isModalVisible, setIsModalVisible] = useState(false);
     // const [videoName, setVideoName] = useState("");
     const [lineOption, setLineOption] = useState(undefined);
-    const [fileList, setFileList] = useState([]);
+    const fileList = useRef([]);
     const [isAddNewVideo, setIsAddNewVideo] = useState(true);
     try {
         if (location.state.initialization) {
@@ -184,117 +185,50 @@ const AddVideo = () => {
             });
     };
 
-    // const handleUploadChange = info => {
-    //   let currentFileList = [...info.fileList];
-    //   setFileList(currentFileList);
-    //   console.log([...info.fileList]);
-    //   if (dirForm.getFieldValue("videoDir") === undefined) {
-    //     return;
-    //   }
-    //   let dir = dirForm.getFieldValue("videoDir");
-    //   let video_names = "";
-    //   for (let i = 0; i < currentFileList.length; i++) {
-    //     video_names += dir + "\\" + currentFileList[i].name + "?";//文件以?分割
-    //   }
-    //   setVideoName(video_names);
-    //   console.log(video_names)
-    // };
-
-    // const handleBeforeUpload = (file) => {
-    //   fileList_.push(file);
-    //   console.log(fileList_);
-    //   // setFileList(fileList.concat(file));
-    //   // console.log("handleUpload");
-    //   // console.log(info);
-    //   // console.log(fileList);
-    //   // setVideoName(info.name);
-    //   setIsModalVisible(true);
-    //   return false; //返回false，即不进行上传
-    // };
-
-    // const handleOnRemove = (file) => {
-    //   const index = fileList_.indexOf(file);
-    //   const newFileList = fileList_.slice();
-    //   newFileList.splice(index, 1);
-    //   fileList_ = newFileList;
-    //   console.log(fileList_);
-    // };
-
-    // const handleOk = () => {
-    //     if (dirForm.getFieldValue("videoDir") === undefined) {
-    //         message.error('未输入文件目录');
-    //         return;
-    //     }
-    //     let dir = dirForm.getFieldValue("videoDir");
-    //     let video_names = "";
-    //     let full_paths = "";
-    //     for (let i = 0; i < fileList.length; i++) {
-    //         video_names += fileList[i].name + "?";
-    //         message.info(fileList[i].path, 10)
-    //         full_paths += dir + "\\" + fileList[i].name + "?";//文件以?分割
-    //     }
-    //     if (fileList.length > 0) {
-    //         video_names = video_names.slice(0, -1);
-    //         full_paths = full_paths.slice(0, -1);
-    //     }
-    //     // setVideoName(video_names);
-    //     form.setFieldsValue({
-    //         name: video_names,
-    //         path: full_paths,
-    //         import_date: moment().format("YYYY-MM-DD HH:mm:ss"),
-    //     });
-    //     setIsModalVisible(false);
-    // };
-    //
-    // const handleCancel = () => {
-    //     setFileList([]);
-    //     setIsModalVisible(false);
-    // };
-
     const props = {
         onRemove: (file) => {
-            setFileList((fileList) => {
-                const index = fileList.indexOf(file);
-                const newFileList = fileList.slice();
-                newFileList.splice(index, 1);
-
-                let video_names = "";
-                let full_paths = "";
-                for (let i = 0; i < newFileList.length; i++) {
-                    video_names += newFileList[i].name + "?";
-                    full_paths += newFileList[i].path + "?";//文件以?分割
+            let index = -1;
+            for(let i = 0; i < fileList.current.length; i++) {
+                if(file.uid === fileList.current[i].uid) {
+                    index = i;
+                    break;
                 }
-                if (newFileList.length > 0) {
-                    video_names = video_names.slice(0, -1);
-                    full_paths = full_paths.slice(0, -1);
-                }
-                // setVideoName(video_names);
-                form.setFieldsValue({
-                    name: video_names,
-                    path: full_paths,
-                    import_date: moment().format("YYYY-MM-DD HH:mm:ss"),
-                });
-
-                return newFileList;
-            });
-        },
-        beforeUpload: (file) => {
-            setFileList((fileList) => {
-                if (!isAddNewVideo) return [file];
-                return [...fileList, file];
-            });
-            // setIsModalVisible(true);
+            }
+            if(index === -1) {
+                message.error("error: index=-1");
+                return;
+            }
+            fileList.current.splice(index, 1);
             let video_names = "";
             let full_paths = "";
-            for (let i = 0; i < fileList.length; i++) {
-                video_names += fileList[i].name + "?";
-                full_paths += fileList[i].path + "?";//文件以?分割
+            for (let i = 0; i < fileList.current.length; i++) {
+                video_names += fileList.current[i].name + "?";
+                full_paths += fileList.current[i].path + "?";//文件以?分割
             }
-            if (fileList.length > 0) {
+            if (fileList.current.length > 0) {
                 video_names = video_names.slice(0, -1);
                 full_paths = full_paths.slice(0, -1);
             }
-            // setVideoName(video_names);
+            form.setFieldsValue({
+                name: video_names,
+                path: full_paths,
+                import_date: moment().format("YYYY-MM-DD HH:mm:ss"),
+            });
+        },
+        beforeUpload: (file) => {
+            if (!isAddNewVideo) fileList.current = [file];
+            else fileList.current = [...fileList.current, file];
+            // setIsModalVisible(true);
+            let video_names = "";
+            let full_paths = "";
+            for (let i = 0; i < fileList.current.length; i++) {
+                video_names += fileList.current[i].name + "?";
+                full_paths += fileList.current[i].path + "?";//文件以?分割
+            }
+            if (fileList.current.length > 0) {
+                video_names = video_names.slice(0, -1);
+                full_paths = full_paths.slice(0, -1);
+            }
             form.setFieldsValue({
                 name: video_names,
                 path: full_paths,
@@ -302,7 +236,6 @@ const AddVideo = () => {
             });
             return false;//返回false，即不进行上传
         },
-        fileList
     };
 
     return (
@@ -429,19 +362,6 @@ const AddVideo = () => {
                         </Affix>
                     </Form.Item>
                 </Form>
-                {/*<Modal*/}
-                {/*    title="文件目录"*/}
-                {/*    visible={isModalVisible}*/}
-                {/*    onOk={handleOk}*/}
-                {/*    onCancel={handleCancel}*/}
-                {/*    maskClosable={false}*/}
-                {/*>*/}
-                {/*    <Form form={dirForm}>*/}
-                {/*        <Form.Item name="videoDir">*/}
-                {/*            <Input/>*/}
-                {/*        </Form.Item>*/}
-                {/*    </Form>*/}
-                {/*</Modal>*/}
             </Card>
         </>
     );
