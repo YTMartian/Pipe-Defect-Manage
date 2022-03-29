@@ -1,7 +1,7 @@
 import React from "react";
 import 'antd/dist/antd.css';
 import request from '../../../request'
-import { useHistory, useLocation } from 'react-router-dom';
+import {useHistory, useLocation} from 'react-router-dom';
 import moment from 'moment';
 import {
     Form,
@@ -14,10 +14,10 @@ import {
     Select,
     Affix,
     Row,
-    Col
+    Col, Breadcrumb
 } from 'antd'
 
-const { Option } = Select;
+const {Option} = Select;
 
 message.config({
     top: 200
@@ -91,7 +91,7 @@ const AddPoint = () => {
                             remark: response.data.list[0]['fields']['remark'],
                         });
                         if (response.data.list[0]['fields']['detection_date'].length > 0) {
-                            form.setFieldsValue({ detection_date: moment(response.data.list[0]['fields']['detection_date'], 'YYYY-MM-DD') })
+                            form.setFieldsValue({detection_date: moment(response.data.list[0]['fields']['detection_date'], 'YYYY-MM-DD')})
                         }
                     } else {
                         message.error('获取管点失败:' + response.data.msg, 3)
@@ -109,9 +109,9 @@ const AddPoint = () => {
     const onFinish = (values) => {
         //解决时间少8个小时的问题
         values.detection_date = values.detection_date != null ? moment(values.detection_date).format("YYYY-MM-DD") : "";
-        let data = { "isEdit": false, "line_id": location.state.line_id, "values": values };
+        let data = {"isEdit": false, "line_id": location.state.line_id, "values": values};
         if (location.state.isEdit) {
-            data = { "isEdit": true, "values": values, "point_id": location.state.point_id }
+            data = {"isEdit": true, "values": values, "point_id": location.state.point_id}
         }
         request({
             method: 'post',
@@ -142,121 +142,29 @@ const AddPoint = () => {
     };
 
     return (
-        <Card>
-            <Form
-                {...formItemLayout}
-                form={form}
-                scrollToFirstError
-                onFinish={onFinish}
-                size='large'
-            >
-                <Row gutter={16}>
-                    <Col span={12}>
-                        <Form.Item label="管线点特征" name="feature">
-                            <Input />
-                        </Form.Item>
-                    </Col>
-                    <Col span={12}>
-                        <Form.Item label="管线附属物" name="attachment">
-                            <Input />
-                        </Form.Item>
-                    </Col>
-                </Row>
-                <Row gutter={16}>
-                    <Col span={12}>
-                        <Form.Item label="点地面高程" name="height" rules={[{ required: true, message: '不能为空' }]}>
-                            <InputNumber />
-                        </Form.Item>
-                    </Col>
-                    <Col span={12}>
-                        <Form.Item label="要素类别" name="feature_category"
-                            rules={[{ required: true, message: '不能为空' }]}>
-                            <Select>
-                                <Option value="雨水">雨水</Option>
-                                <Option value="污水">污水</Option>
-                                <Option value="合流">合流</Option>
-                            </Select>
-                        </Form.Item>
-                    </Col>
-                </Row>
-                <Row gutter={16}>
-                    <Col span={12}>
-                        <Form.Item label="X坐标" name="x_coordinate" rules={[{ required: true, message: '不能为空' }]}>
-                            <InputNumber />
-                        </Form.Item>
-                    </Col>
-                    <Col span={12}>
-                        <Form.Item label="Y坐标" name="y_coordinate" rules={[{ required: true, message: '不能为空' }]}>
-                            <InputNumber />
-                        </Form.Item>
-                    </Col>
-                </Row>
-                <Row gutter={16}>
-                    <Col span={12}>
-                        <Form.Item label="井底埋深" name="depth" rules={[{ required: true, message: '不能为空' }]}>
-                            <InputNumber />
-                        </Form.Item>
-                    </Col>
-                    <Col span={12}>
-                        <Form.Item label="所在道路" name="road_where">
-                            <Input />
-                        </Form.Item>
-                    </Col>
-                </Row>
-                <Row gutter={16}>
-                    <Col span={12}>
-                        <Form.Item label="埋设年代" name="build_year">
-                            <InputNumber />
-                        </Form.Item>
-                    </Col>
-                    <Col span={12}>
-                        <Form.Item label="权属单位" name="ownership">
-                            <Input />
-                        </Form.Item>
-                    </Col>
-                </Row>
-                <Row gutter={16}>
-                    <Col span={12}>
-                        <Form.Item label="探测日期" name="detection_date">
-                            <DatePicker placeholder="选择日期" />
-                        </Form.Item>
-                    </Col>
-                    <Col span={12}>
-                        <Form.Item label="探测单位" name="detection_unit">
-                            <Input />
-                        </Form.Item>
-                    </Col>
-                </Row>
-                <Row gutter={16}>
-                    <Col span={12}>
-                        <Form.Item label="监理单位" name="supervisor_unit">
-                            <Input />
-                        </Form.Item>
-                    </Col>
-                    <Col span={12}>
-                        <Form.Item label="状态" name="state">
-                            <Input />
-                        </Form.Item>
-                    </Col>
-                </Row>
-                <Row gutter={16}>
-                    <Col span={12}>
-                        <Form.Item label="精度级别" name="precision_level">
-                            <Input />
-                        </Form.Item>
-                    </Col>
-                    <Col span={12}>
-                        <Form.Item label="备注" name="remark">
-                            <Input.TextArea autoSize={{ minRows: 1 }} />
-                        </Form.Item>
-                    </Col>
-                </Row>
-                <Form.Item {...tailFormItemLayout}>
-                    <Affix offsetBottom={10}>
-                        <Button type="primary" htmlType="submit">
-                            确定
-                        </Button>
-                        <Button onClick={() => {
+        <>
+            <div style={{marginBottom: 10}}>
+                <Breadcrumb>
+                    <Breadcrumb.Item>
+                        <a href="javascript:" onClick={() => {
+                            history.push('/')
+                        }}>主页</a>
+                    </Breadcrumb.Item>
+                    <Breadcrumb.Item>
+                        <a href="javascript:" onClick={() => {
+                            history.push('/ProjectManage/ProjectList')
+                        }}>工程列表</a>
+                    </Breadcrumb.Item>
+                    <Breadcrumb.Item>
+                        <a href="javascript:" onClick={() => {
+                            history.push({
+                                pathname: '/ProjectManage/LineList',
+                                state: {project_id: location.state.project_id, initialization: true}
+                            })
+                        }}>管线列表</a>
+                    </Breadcrumb.Item>
+                    <Breadcrumb.Item>
+                        <a href="javascript:" onClick={() => {
                             history.push({
                                 pathname: '/ProjectManage/PointList',
                                 state: {
@@ -265,13 +173,142 @@ const AddPoint = () => {
                                     initialization: true
                                 }
                             })
-                        }}>
-                            返回
-                        </Button>
-                    </Affix>
-                </Form.Item>
-            </Form>
-        </Card>
+                        }}>管点列表</a>
+                    </Breadcrumb.Item>
+                    <Breadcrumb.Item>{location.state.isEdit ? "修改管点" : "添加管点"}</Breadcrumb.Item>
+                </Breadcrumb>
+            </div>
+            <Card>
+                <Form
+                    {...formItemLayout}
+                    form={form}
+                    scrollToFirstError
+                    onFinish={onFinish}
+                    size='large'
+                >
+                    <Row gutter={16}>
+                        <Col span={12}>
+                            <Form.Item label="管线点特征" name="feature">
+                                <Input/>
+                            </Form.Item>
+                        </Col>
+                        <Col span={12}>
+                            <Form.Item label="管线附属物" name="attachment">
+                                <Input/>
+                            </Form.Item>
+                        </Col>
+                    </Row>
+                    <Row gutter={16}>
+                        <Col span={12}>
+                            <Form.Item label="点地面高程" name="height" rules={[{required: true, message: '不能为空'}]}>
+                                <InputNumber/>
+                            </Form.Item>
+                        </Col>
+                        <Col span={12}>
+                            <Form.Item label="要素类别" name="feature_category"
+                                       rules={[{required: true, message: '不能为空'}]}>
+                                <Select>
+                                    <Option value="雨水">雨水</Option>
+                                    <Option value="污水">污水</Option>
+                                    <Option value="合流">合流</Option>
+                                </Select>
+                            </Form.Item>
+                        </Col>
+                    </Row>
+                    <Row gutter={16}>
+                        <Col span={12}>
+                            <Form.Item label="X坐标" name="x_coordinate" rules={[{required: true, message: '不能为空'}]}>
+                                <InputNumber/>
+                            </Form.Item>
+                        </Col>
+                        <Col span={12}>
+                            <Form.Item label="Y坐标" name="y_coordinate" rules={[{required: true, message: '不能为空'}]}>
+                                <InputNumber/>
+                            </Form.Item>
+                        </Col>
+                    </Row>
+                    <Row gutter={16}>
+                        <Col span={12}>
+                            <Form.Item label="井底埋深" name="depth" rules={[{required: true, message: '不能为空'}]}>
+                                <InputNumber/>
+                            </Form.Item>
+                        </Col>
+                        <Col span={12}>
+                            <Form.Item label="所在道路" name="road_where">
+                                <Input/>
+                            </Form.Item>
+                        </Col>
+                    </Row>
+                    <Row gutter={16}>
+                        <Col span={12}>
+                            <Form.Item label="埋设年代" name="build_year">
+                                <InputNumber/>
+                            </Form.Item>
+                        </Col>
+                        <Col span={12}>
+                            <Form.Item label="权属单位" name="ownership">
+                                <Input/>
+                            </Form.Item>
+                        </Col>
+                    </Row>
+                    <Row gutter={16}>
+                        <Col span={12}>
+                            <Form.Item label="探测日期" name="detection_date">
+                                <DatePicker placeholder="选择日期"/>
+                            </Form.Item>
+                        </Col>
+                        <Col span={12}>
+                            <Form.Item label="探测单位" name="detection_unit">
+                                <Input/>
+                            </Form.Item>
+                        </Col>
+                    </Row>
+                    <Row gutter={16}>
+                        <Col span={12}>
+                            <Form.Item label="监理单位" name="supervisor_unit">
+                                <Input/>
+                            </Form.Item>
+                        </Col>
+                        <Col span={12}>
+                            <Form.Item label="状态" name="state">
+                                <Input/>
+                            </Form.Item>
+                        </Col>
+                    </Row>
+                    <Row gutter={16}>
+                        <Col span={12}>
+                            <Form.Item label="精度级别" name="precision_level">
+                                <Input/>
+                            </Form.Item>
+                        </Col>
+                        <Col span={12}>
+                            <Form.Item label="备注" name="remark">
+                                <Input.TextArea autoSize={{minRows: 1}}/>
+                            </Form.Item>
+                        </Col>
+                    </Row>
+                    <Form.Item {...tailFormItemLayout}>
+                        <Affix offsetBottom={10}>
+                            <Button type="primary" htmlType="submit">
+                                确定
+                            </Button>
+                            <Button onClick={() => {
+                                history.push({
+                                    pathname: '/ProjectManage/PointList',
+                                    state: {
+                                        project_id: location.state.project_id,
+                                        line_id: location.state.line_id,
+                                        initialization: true
+                                    }
+                                })
+                            }}>
+                                返回
+                            </Button>
+                        </Affix>
+                    </Form.Item>
+                </Form>
+            </Card>
+        </>
     )
 };
 

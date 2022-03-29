@@ -10,7 +10,7 @@ import {
     Popconfirm,
     message,
     Tooltip,
-    Badge
+    Badge, Breadcrumb
 } from 'antd'
 
 
@@ -44,7 +44,7 @@ const VideoList = () => {
                         record_date: response.data.list[i]['fields']['record_date'],
                         import_date: response.data.list[i]['fields']['import_date'],
                         remark: response.data.list[i]['fields']['remark'],
-                        defect_count:response.data.list[i]['fields']['defect_count']
+                        defect_count: response.data.list[i]['fields']['defect_count']
                     });
                 }
                 setData({currentData: newData, allData: newData});
@@ -227,7 +227,7 @@ const VideoList = () => {
             align: "center",
             render: (_, record) => (
                 // eslint-disable-next-line jsx-a11y/anchor-is-valid,no-script-url
-                <Badge count={record.defect_count} offset={[13, -7]} size="small" style={{ backgroundColor: 'red' }}>
+                <Badge count={record.defect_count} offset={[13, -7]} size="small" style={{backgroundColor: 'red'}}>
                     <a href="javascript:" onClick={() => history.push({
                         pathname: '/ProjectManage/DefectDetection',
                         state: {
@@ -254,6 +254,21 @@ const VideoList = () => {
     ];
     return (
         <>
+            <div style={{marginBottom: 10}}>
+                <Breadcrumb>
+                    <Breadcrumb.Item>
+                        <a href="javascript:" onClick={() => {
+                            history.push('/')
+                        }}>主页</a>
+                    </Breadcrumb.Item>
+                    <Breadcrumb.Item>
+                        <a href="javascript:" onClick={() => {
+                            history.push('/ProjectManage/ProjectList')
+                        }}>工程列表</a>
+                    </Breadcrumb.Item>
+                    <Breadcrumb.Item>视频列表</Breadcrumb.Item>
+                </Breadcrumb>
+            </div>
             <div>
                 <Button
                     onClick={() => {

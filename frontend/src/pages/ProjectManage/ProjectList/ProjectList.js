@@ -17,7 +17,8 @@ import {
     Col,
     Badge,
     Spin,
-    Breadcrumb
+    Breadcrumb,
+    Card
 } from 'antd';
 
 const {Search} = Input;
@@ -425,18 +426,20 @@ const ProjectList = () => {
                     </Spin>
         },
     ];
+
+
     return (
         <>
-            <Breadcrumb>
-                <Breadcrumb.Item>Home</Breadcrumb.Item>
-                <Breadcrumb.Item>
-                    <a href="">Application Center</a>
-                </Breadcrumb.Item>
-                <Breadcrumb.Item>
-                    <a href="">Application List</a>
-                </Breadcrumb.Item>
-                <Breadcrumb.Item>An Application</Breadcrumb.Item>
-            </Breadcrumb>
+            <div style={{marginBottom: 10}}>
+                <Breadcrumb>
+                    <Breadcrumb.Item>
+                        <a href="javascript:" onClick={() => {
+                            history.push('/')
+                        }}>主页</a>
+                    </Breadcrumb.Item>
+                    <Breadcrumb.Item>工程列表</Breadcrumb.Item>
+                </Breadcrumb>
+            </div>
             <div>
                 <Button
                     onClick={() => {

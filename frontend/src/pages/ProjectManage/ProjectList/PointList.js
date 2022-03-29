@@ -1,7 +1,7 @@
-import { useHistory, useLocation } from "react-router-dom"
-import { Table, Button, Popconfirm, message } from 'antd'
+import {useHistory, useLocation} from "react-router-dom"
+import {Table, Button, Popconfirm, message, Breadcrumb} from 'antd'
 import request from "../../../request"
-import React, { useState } from "react"
+import React, {useState} from "react"
 import 'antd/dist/antd.css'
 import './style.css'
 
@@ -13,8 +13,8 @@ message.config({
 const PointList = () => {
     const history = useHistory();
     const location = useLocation();
-    const [data, setData] = useState({ currentData: [], allData: [] });
-    const [state, setState] = useState({ selectedRowKeys: [] });//使用state从而更改数据后能够实时更新
+    const [data, setData] = useState({currentData: [], allData: []});
+    const [state, setState] = useState({selectedRowKeys: []});//使用state从而更改数据后能够实时更新
 
     const getPoint = () => {
         request({
@@ -37,7 +37,7 @@ const PointList = () => {
                         state: response.data.list[i]['fields']['state'],
                     });
                 }
-                setData({ currentData: newData, allData: newData });
+                setData({currentData: newData, allData: newData});
             } else {
                 message.error('获取失败:' + response.data.msg, 3)
             }
@@ -81,10 +81,10 @@ const PointList = () => {
 
     const onSelectChange = selectedRowKeys => {
         console.log('selectedRowKeys changed: ', selectedRowKeys);
-        setState({ selectedRowKeys: selectedRowKeys });
+        setState({selectedRowKeys: selectedRowKeys});
     };
 
-    const { selectedRowKeys } = state;
+    const {selectedRowKeys} = state;
     const rowSelection = {
         selectedRowKeys,
         onChange: onSelectChange,
@@ -97,7 +97,7 @@ const PointList = () => {
                     newSelectedRowKeys = allRowKeys.filter((key, index) => {
                         return true;
                     });
-                    setState({ selectedRowKeys: newSelectedRowKeys });
+                    setState({selectedRowKeys: newSelectedRowKeys});
                 },
             },
             {
@@ -108,7 +108,7 @@ const PointList = () => {
                     newSelectedRowKeys = allRowKeys.filter((key, index) => {
                         return !(state.selectedRowKeys.includes(key));//用includes判断是否含有某元素
                     });
-                    setState({ selectedRowKeys: newSelectedRowKeys });
+                    setState({selectedRowKeys: newSelectedRowKeys});
                 },
             },
             {
@@ -116,7 +116,7 @@ const PointList = () => {
                 text: '清空',
                 onSelect: allRowKeys => {
                     let newSelectedRowKeys = [];
-                    setState({ selectedRowKeys: newSelectedRowKeys });
+                    setState({selectedRowKeys: newSelectedRowKeys});
                 },
             },
         ],
@@ -195,15 +195,38 @@ const PointList = () => {
     ];
     return (
         <>
+            <div style={{marginBottom: 10}}>
+                <Breadcrumb>
+                    <Breadcrumb.Item>
+                        <a href="javascript:" onClick={() => {
+                            history.push('/')
+                        }}>主页</a>
+                    </Breadcrumb.Item>
+                    <Breadcrumb.Item>
+                        <a href="javascript:" onClick={() => {
+                            history.push('/ProjectManage/ProjectList')
+                        }}>工程列表</a>
+                    </Breadcrumb.Item>
+                    <Breadcrumb.Item>
+                        <a href="javascript:" onClick={() => {
+                            history.push({
+                                pathname: '/ProjectManage/LineList',
+                                state: {project_id: location.state.project_id, initialization: true}
+                            })
+                        }}>管线列表</a>
+                    </Breadcrumb.Item>
+                    <Breadcrumb.Item>管点列表</Breadcrumb.Item>
+                </Breadcrumb>
+            </div>
             <div>
                 <Button
                     onClick={() => {
                         history.push({
                             pathname: '/ProjectManage/LineList',
-                            state: { project_id: location.state.project_id, initialization: true }
+                            state: {project_id: location.state.project_id, initialization: true}
                         })
                     }}
-                    style={{ float: 'left' }}
+                    style={{float: 'left'}}
                 >
                     返回
                 </Button>

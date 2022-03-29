@@ -16,7 +16,8 @@ import {
     Col,
     Drawer,
     Select,
-    Tag
+    Tag,
+    Breadcrumb
 } from 'antd'
 
 const {TextArea} = Input;
@@ -225,159 +226,176 @@ const AddProject = () => {
     }
 
     return (
-        <Card>
-            <Form
-                {...formItemLayout}
-                form={form}
-                scrollToFirstError
-                onFinish={onFinish}
-                size='large'
-            >
-                <Row gutter={16}>
-                    <Col span={12}>
-                        <Form.Item label="工程编号" name="project_no">
-                            <Input/>
-                        </Form.Item>
-                    </Col>
-                    <Col span={12}>
-                        <Form.Item label="工程名称" name="project_name" rules={[{required: true, message: '不能为空'}]}>
-                            <Input/>
-                        </Form.Item>
-                    </Col>
-                </Row>
-                <Row gutter={16}>
-                    <Col span={12}>
-                        <Form.Item label="负责人" name="staff">
-                            <div style={{display: 'flex'}}>
-                                <Select
-                                    mode="multiple"
-                                    showArrow={true}
-                                    style={{width: '100%'}}
-                                    value={selectStaffs}
-                                    onChange={handStaffChange}
-                                    tagRender={tagRender}
-                                    notFoundContent="无负责人"
-                                >
-                                    {staffOption}
-                                </Select>
-                                <Button onClick={editStaff} type='link'>
-                                    编辑
-                                </Button>
-                            </div>
-                        </Form.Item>
-                    </Col>
-                    <Col span={12}>
-                        <Form.Item label="开工日期" name="start_date">
-                            <DatePicker placeholder="选择日期"/>
-                        </Form.Item>
-                    </Col>
-                </Row>
-                <Row gutter={16}>
-                    <Col span={12}>
-                        <Form.Item label="报告编号" name="report_no">
-                            <Input/>
-                        </Form.Item>
-                    </Col>
-                    <Col span={12}>
-                        <Form.Item label="委托单位" name="requester_unit">
-                            <Input/>
-                        </Form.Item>
-                    </Col>
-                </Row>
-                <Row gutter={16}>
-                    <Col span={12}>
-                        <Form.Item label="建设单位" name="construction_unit">
-                            <Input/>
-                        </Form.Item>
-                    </Col>
-                    <Col span={12}>
-                        <Form.Item label="设计单位" name="design_unit">
-                            <Input/>
-                        </Form.Item>
-                    </Col>
-                </Row>
-                <Row gutter={16}>
-                    <Col span={12}>
-                        <Form.Item label="施工单位" name="build_unit">
-                            <Input/>
-                        </Form.Item>
-                    </Col>
-                    <Col span={12}>
-                        <Form.Item label="监理单位" name="supervisory_unit">
-                            <Input/>
-                        </Form.Item>
-                    </Col>
-                </Row>
-                <Row gutter={16}>
-                    <Col span={12}>
-                        <Form.Item label="移动方式" name="move">
-                            <Input/>
-                        </Form.Item>
-                    </Col>
-                    <Col span={12}>
-                        <Form.Item label="封堵方式" name="plugging">
-                            <Input/>
-                        </Form.Item>
-                    </Col>
-                </Row>
-                <Row gutter={16}>
-                    <Col span={12}>
-                        <Form.Item label="排水方式" name="drainage">
-                            <Input/>
-                        </Form.Item>
-                    </Col>
-                    <Col span={12}>
-                        <Form.Item label="清疏方式" name="dredging">
-                            <Input/>
-                        </Form.Item>
-                    </Col>
-                </Row>
-                <Row gutter={16}>
-                    <Col span={12}>
-                        <Form.Item label="检测设备" name="detection_equipment">
-                            <Input/>
-                        </Form.Item>
-                    </Col>
-                    <Col span={12}>
-                        <Form.Item label="检测方式" name="detection_method">
-                            <Input/>
-                        </Form.Item>
-                    </Col>
-                </Row>
-                <Row gutter={16}>
-                    <Col span={12}>
-                        <Form.Item label="描述" name="description">
-                            <TextArea  autoSize={{minRows: 1}}/>
-                        </Form.Item>
-                    </Col>
-                </Row>
-
-
-                <Form.Item {...tailFormItemLayout}>
-                    <Affix offsetBottom={10}>
-                        <Button type="primary" htmlType="submit">
-                            确定
-                        </Button>
-                        <Button onClick={() => {
+        <>
+            <div style={{marginBottom: 10}}>
+                <Breadcrumb>
+                    <Breadcrumb.Item>
+                        <a href="javascript:" onClick={() => {
+                            history.push('/')
+                        }}>主页</a>
+                    </Breadcrumb.Item>
+                    <Breadcrumb.Item>
+                        <a href="javascript:" onClick={() => {
                             history.push('/ProjectManage/ProjectList')
-                        }}>
-                            返回
-                        </Button>
-                    </Affix>
-                </Form.Item>
-            </Form>
-            <Drawer
-                width={720}
-                visible={staffDrawerVisible}
-                onClose={closeStaffDrawer}
-                closable={false}
-                keyboard={true}
-                drawerStyle={{paddingTop: '12%'}}
-                destroyOnClose={true}
-            >
-                <StaffEditableTable/>
-            </Drawer>
-        </Card>
+                        }}>工程列表</a>
+                    </Breadcrumb.Item>
+                    <Breadcrumb.Item>{location.state.isEdit ? "修改工程" : "添加工程"}</Breadcrumb.Item>
+                </Breadcrumb>
+            </div>
+            <Card>
+                <Form
+                    {...formItemLayout}
+                    form={form}
+                    scrollToFirstError
+                    onFinish={onFinish}
+                    size='large'
+                >
+                    <Row gutter={16}>
+                        <Col span={12}>
+                            <Form.Item label="工程编号" name="project_no">
+                                <Input/>
+                            </Form.Item>
+                        </Col>
+                        <Col span={12}>
+                            <Form.Item label="工程名称" name="project_name" rules={[{required: true, message: '不能为空'}]}>
+                                <Input/>
+                            </Form.Item>
+                        </Col>
+                    </Row>
+                    <Row gutter={16}>
+                        <Col span={12}>
+                            <Form.Item label="负责人" name="staff">
+                                <div style={{display: 'flex'}}>
+                                    <Select
+                                        mode="multiple"
+                                        showArrow={true}
+                                        style={{width: '100%'}}
+                                        value={selectStaffs}
+                                        onChange={handStaffChange}
+                                        tagRender={tagRender}
+                                        notFoundContent="无负责人"
+                                    >
+                                        {staffOption}
+                                    </Select>
+                                    <Button onClick={editStaff} type='link'>
+                                        编辑
+                                    </Button>
+                                </div>
+                            </Form.Item>
+                        </Col>
+                        <Col span={12}>
+                            <Form.Item label="开工日期" name="start_date">
+                                <DatePicker placeholder="选择日期"/>
+                            </Form.Item>
+                        </Col>
+                    </Row>
+                    <Row gutter={16}>
+                        <Col span={12}>
+                            <Form.Item label="报告编号" name="report_no">
+                                <Input/>
+                            </Form.Item>
+                        </Col>
+                        <Col span={12}>
+                            <Form.Item label="委托单位" name="requester_unit">
+                                <Input/>
+                            </Form.Item>
+                        </Col>
+                    </Row>
+                    <Row gutter={16}>
+                        <Col span={12}>
+                            <Form.Item label="建设单位" name="construction_unit">
+                                <Input/>
+                            </Form.Item>
+                        </Col>
+                        <Col span={12}>
+                            <Form.Item label="设计单位" name="design_unit">
+                                <Input/>
+                            </Form.Item>
+                        </Col>
+                    </Row>
+                    <Row gutter={16}>
+                        <Col span={12}>
+                            <Form.Item label="施工单位" name="build_unit">
+                                <Input/>
+                            </Form.Item>
+                        </Col>
+                        <Col span={12}>
+                            <Form.Item label="监理单位" name="supervisory_unit">
+                                <Input/>
+                            </Form.Item>
+                        </Col>
+                    </Row>
+                    <Row gutter={16}>
+                        <Col span={12}>
+                            <Form.Item label="移动方式" name="move">
+                                <Input/>
+                            </Form.Item>
+                        </Col>
+                        <Col span={12}>
+                            <Form.Item label="封堵方式" name="plugging">
+                                <Input/>
+                            </Form.Item>
+                        </Col>
+                    </Row>
+                    <Row gutter={16}>
+                        <Col span={12}>
+                            <Form.Item label="排水方式" name="drainage">
+                                <Input/>
+                            </Form.Item>
+                        </Col>
+                        <Col span={12}>
+                            <Form.Item label="清疏方式" name="dredging">
+                                <Input/>
+                            </Form.Item>
+                        </Col>
+                    </Row>
+                    <Row gutter={16}>
+                        <Col span={12}>
+                            <Form.Item label="检测设备" name="detection_equipment">
+                                <Input/>
+                            </Form.Item>
+                        </Col>
+                        <Col span={12}>
+                            <Form.Item label="检测方式" name="detection_method">
+                                <Input/>
+                            </Form.Item>
+                        </Col>
+                    </Row>
+                    <Row gutter={16}>
+                        <Col span={12}>
+                            <Form.Item label="描述" name="description">
+                                <TextArea autoSize={{minRows: 1}}/>
+                            </Form.Item>
+                        </Col>
+                    </Row>
+
+
+                    <Form.Item {...tailFormItemLayout}>
+                        <Affix offsetBottom={10}>
+                            <Button type="primary" htmlType="submit">
+                                确定
+                            </Button>
+                            <Button onClick={() => {
+                                history.push('/ProjectManage/ProjectList')
+                            }}>
+                                返回
+                            </Button>
+                        </Affix>
+                    </Form.Item>
+                </Form>
+                <Drawer
+                    width={720}
+                    visible={staffDrawerVisible}
+                    onClose={closeStaffDrawer}
+                    closable={false}
+                    keyboard={true}
+                    drawerStyle={{paddingTop: '12%'}}
+                    destroyOnClose={true}
+                >
+                    <StaffEditableTable/>
+                </Drawer>
+            </Card>
+        </>
     )
 };
 

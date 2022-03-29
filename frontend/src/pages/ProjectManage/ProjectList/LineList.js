@@ -9,7 +9,7 @@ import {
     Button,
     Popconfirm,
     message,
-    Badge
+    Badge, Breadcrumb
 } from 'antd'
 
 message.config({
@@ -223,6 +223,21 @@ const LineList = () => {
     ];
     return (
         <>
+            <div style={{marginBottom: 10}}>
+                <Breadcrumb>
+                    <Breadcrumb.Item>
+                        <a href="javascript:" onClick={() => {
+                            history.push('/')
+                        }}>主页</a>
+                    </Breadcrumb.Item>
+                    <Breadcrumb.Item>
+                        <a href="javascript:" onClick={() => {
+                            history.push('/ProjectManage/ProjectList')
+                        }}>工程列表</a>
+                    </Breadcrumb.Item>
+                    <Breadcrumb.Item>视频列表</Breadcrumb.Item>
+                </Breadcrumb>
+            </div>
             <div>
                 <Button
                     onClick={() => {

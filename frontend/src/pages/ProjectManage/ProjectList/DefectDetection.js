@@ -19,7 +19,8 @@ import {
     Slider,
     Modal,
     Progress,
-    Drawer
+    Drawer,
+    Breadcrumb, Image,
 } from 'antd'
 
 import {
@@ -31,6 +32,8 @@ import StaffEditableTable from "./staffList";
 import DefectDraw from "./DefectDraw";
 // import {Player} from 'video-react'
 // import 'video-react/dist/video-react.css'
+//这样导入import rough from 'roughjs';报错：roughjs__WEBPACK_IMPORTED_MODULE_10___default.a.canvas is not a function
+import rough from 'roughjs/bundled/rough.esm.js';//https://roughjs.com/
 
 const {Option} = Select;
 
@@ -151,6 +154,7 @@ const DefectDetection = () => {
         };
 
         const drawMarks = () => {
+            /* 原来的slider方案
             //在下方进度条上标记缺陷位置
             let newMarks = {};
             let totalSeconds = parseInt(videoRef.current.duration);
@@ -160,6 +164,26 @@ const DefectDetection = () => {
                 if (newMarks[position] === undefined) newMarks[position] = '';
             }
             setMarks(newMarks);
+            */
+            const svg = document.getElementById('marksSVG');
+            while (svg.lastChild) {
+                svg.removeChild(svg.lastChild);
+            }
+            const roughSvg = rough.svg(svg);
+            let totalSeconds = parseInt(videoRef.current.duration);
+            for (let i = 0; i < allDefects.current.length; i++) {
+                let seconds = timeToSeconds(allDefects.current[i]['fields']['time_in_video']);
+                let position = Math.round((seconds * videoRef.current.offsetWidth) / totalSeconds);
+                //防止圆跑到外面去
+                if(position < 5) position = 5;
+                else if(position > videoRef.current.offsetWidth - 5) position = videoRef.current.offsetWidth - 5;
+                svg.appendChild(roughSvg.circle(position, 6, 10, {
+                    fill: "rgba(242, 60, 60, 0.9)",
+                    fillStyle: 'solid',
+                    roughness: 0,
+                    strokeWidth: 0
+                }));
+            }
         };
 
         const getAllDefects = () => {
@@ -565,66 +589,149 @@ const DefectDetection = () => {
         //         </video>);
         // };
 
-        return (
+        const svgMouseClick = ({nativeEvent}) => {
+            const nowX = nativeEvent.offsetX;
+            const nowY = nativeEvent.offsetY;
+            if (nowY < 1 || nowY > 11) return;//因为绘制的圆的y坐标为6，直径为10
+            //判断点的是哪个缺陷
+            let totalSeconds = parseInt(videoRef.current.duration);
+            for (let i = 0; i < allDefects.current.length; i++) {
+                let seconds = timeToSeconds(allDefects.current[i]['fields']['time_in_video']);
+                let position = Math.round((seconds * videoRef.current.offsetWidth) / totalSeconds);
+                //防止圆跑到外面去
+                if(position < 5) position = 5;
+                else if(position > videoRef.current.offsetWidth - 5) position = videoRef.current.offsetWidth - 5;
+                if (nowX >= position - 5 && nowX <= position + 5) {
+                    currentDefectIndex.current = i;
+                    setCurrentDefect();
+                    isDragSlider.current = false;//防止设置进度条时触发onSeeking
+                    videoRef.current.currentTime = seconds;
+                    break;
+                }
+            }
+        }
 
-            <Card style={{marginTop: "-5%"}}>
-                <Affix offsetTop={120} style={{float: "left", width: "60%", height: "100%"}}>
-                    <Row>
-                        {myVideo}
-                    </Row>
-                    <Slider dots={false}
-                            tooltipVisible={false}
-                            marks={marks}
-                            style={{width: "90%", marginTop: "-1%", marginLeft: "0"}}
-                            trackStyle={{
-                                height: '6px',
-                                borderRadius: '10px',
-                                background: '#64b4ff'
-                            }}
-                            railStyle={{
-                                height: '6px',
-                                borderRadius: '6px',
-                            }}
-                            handleStyle={{
-                                borderColor: "#00000000",//隐藏handle
-                                width: '0',
-                                height: '0',
-                                top: '-100vh'
-                            }}
-                            value={100}
-                    />
-                    <Row gutter={16} style={{marginTop: "0"}}>
-                        <Col span={4}>
-                            <Button
-                                onClick={handleAuto}
-                                type="primary"
-                            >
-                                自动检测
-                            </Button>
-                        </Col>
-                        {/*<Col span={4}>*/}
-                        {/*    <Button*/}
-                        {/*        onClick={handleManual}*/}
-                        {/*        type="default"*/}
-                        {/*    >*/}
-                        {/*        手动检测*/}
-                        {/*    </Button>*/}
-                        {/*</Col>*/}
-                        <Col span={4}>
-                            <Select onChange={onChangePlayback} defaultValue={1} style={{width: 100}}
-                                    getPopupContainer={triggerNode => triggerNode.parentElement} //展开框相对父元素固定，否则affix下会select不动展开框动
-                            >
-                                <Option value={0.5}>倍速x0.5</Option>
-                                <Option value={1}>倍速x1.0</Option>
-                                <Option value={2}>倍速x1.5</Option>
-                                <Option value={2.5}>倍速x2.0</Option>
-                                <Option value={3}>倍速x3.0</Option>
-                            </Select>
-                        </Col>
-                    </Row>
-                </Affix>
-                <div style={{float: "right", width: "40%", height: "100%"}}>
-                    <Affix offsetTop={100}>
+        const svgMouseMove = ({nativeEvent}) => {
+            const nowX = nativeEvent.offsetX;
+            const nowY = nativeEvent.offsetY;
+            if (nowY < 1 || nowY > 11) return;//因为绘制的圆的y坐标为6，直径为10
+            const svg = document.getElementById('marksSVG');
+            while (svg.lastChild) {
+                svg.removeChild(svg.lastChild);
+            }
+            const roughSvg = rough.svg(svg);
+            let totalSeconds = parseInt(videoRef.current.duration);
+            for (let i = 0; i < allDefects.current.length; i++) {
+                let seconds = timeToSeconds(allDefects.current[i]['fields']['time_in_video']);
+                let position = Math.round((seconds * videoRef.current.offsetWidth) / totalSeconds);
+                //防止圆跑到外面去
+                if(position < 5) position = 5;
+                else if(position > videoRef.current.offsetWidth - 5) position = videoRef.current.offsetWidth - 5;
+                if (nowX >= position - 5 && nowX <= position + 5) {//如果鼠标移动到了某个缺线圆形上
+                    svg.appendChild(roughSvg.circle(position, 6, 12, {
+                        fill: "rgba(242, 60, 60, 0.9)",
+                        fillStyle: 'solid',
+                        roughness: 0,
+                        stroke: "black",
+                        strokeWidth: 1
+                    }));
+                } else {
+                    svg.appendChild(roughSvg.circle(position, 6, 10, {
+                        fill: "rgba(242, 60, 60, 0.9)",
+                        fillStyle: 'solid',
+                        roughness: 0,
+                        strokeWidth: 0
+                    }));
+                }
+            }
+        }
+
+        return (
+            <>
+                <div style={{marginBottom: 10}}>
+                    <Breadcrumb>
+                        <Breadcrumb.Item>
+                            <a href="javascript:" onClick={() => {
+                                history.push('/')
+                            }}>主页</a>
+                        </Breadcrumb.Item>
+                        <Breadcrumb.Item>
+                            <a href="javascript:" onClick={() => {
+                                history.push('/ProjectManage/ProjectList')
+                            }}>工程列表</a>
+                        </Breadcrumb.Item>
+                        <Breadcrumb.Item>
+                            <a href="javascript:" onClick={() => {
+                                history.push({
+                                    pathname: '/ProjectManage/VideoList',
+                                    state: {project_id: location.state.project_id, initialization: true}
+                                })
+                            }}>视频列表</a>
+                        </Breadcrumb.Item>
+                        <Breadcrumb.Item>缺陷管理</Breadcrumb.Item>
+                    </Breadcrumb>
+                </div>
+                <Card style={{marginTop: "0%"}}>
+                    <Affix offsetTop={120} style={{float: "left", width: "60%", height: "100%"}}>
+                        <Row>
+                            {myVideo}
+                        </Row>
+                        <div id="marksDiv" style={{height: 20, width: "100%"}}>
+                            <svg
+                                id='marksSVG'
+                                style={{width: "100%", marginTop: "0%", marginLeft: "0"}}
+                                onClick={svgMouseClick}
+                                onMouseMove={svgMouseMove}
+                            />
+                        </div>
+                        {/*<Slider dots={false}*/}
+                        {/*        tooltipVisible={false}*/}
+                        {/*        marks={marks}*/}
+                        {/*        style={{width: "90%", marginTop: "-1%", marginLeft: "0"}}*/}
+                        {/*        trackStyle={{*/}
+                        {/*            height: '6px',*/}
+                        {/*            borderRadius: '10px',*/}
+                        {/*            background: '#64b4ff'*/}
+                        {/*        }}*/}
+                        {/*        railStyle={{*/}
+                        {/*            height: '6px',*/}
+                        {/*            borderRadius: '6px',*/}
+                        {/*        }}*/}
+                        {/*        handleStyle={{*/}
+                        {/*            borderColor: "#00000000",//隐藏handle*/}
+                        {/*            width: '0',*/}
+                        {/*            height: '0',*/}
+                        {/*            top: '-100vh'*/}
+                        {/*        }}*/}
+                        {/*        value={100}*/}
+                        {/*/>*/}
+                        <Row gutter={16} style={{marginTop: 5}}>
+                            <Col span={4}>
+                                <Button
+                                    onClick={handleAuto}
+                                    type="primary"
+                                >
+                                    自动检测
+                                </Button>
+                            </Col>
+                            <Col span={4}>
+                                <Select onChange={onChangePlayback} defaultValue={1} style={{width: 100}}
+                                        getPopupContainer={triggerNode => triggerNode.parentElement} //展开框相对父元素固定，否则affix下会select不动展开框动
+                                >
+                                    <Option value={0.5}>倍速x0.5</Option>
+                                    <Option value={1}>倍速x1.0</Option>
+                                    <Option value={2}>倍速x1.5</Option>
+                                    <Option value={2.5}>倍速x2.0</Option>
+                                    <Option value={3}>倍速x3.0</Option>
+                                </Select>
+                            </Col>
+                        </Row>
+                    </Affix>
+                    <div style={{
+                        float: "right",
+                        width: "40%",
+                    }}>
+                        {/*<Affix offsetTop={100}>*/}
                         <Card>
                             <Row gutter={24} justify="center">
                                 <Col span={4}>
@@ -665,98 +772,105 @@ const DefectDetection = () => {
                                 </Col>
                             </Row>
                         </Card>
-                    </Affix>
-                    <Card>
-                        <Form
-                            {...formItemLayout}
-                            form={form}
-                            scrollToFirstError
-                            size='large'
-                            onFinish={onFinish}
-                        >
-                            <Form.Item label="视频" name="video_id" rules={[{required: true, message: '不能为空'}]}>
-                                <Input disabled={true}/>
-                            </Form.Item>
-                            <Form.Item label="视频内时间" name="time_in_video" rules={[{required: true, message: '不能为空'}]}>
-                                <Input disabled={true}/>
-                            </Form.Item>
-                            <Form.Item label="缺陷类别" name="defect_type_id" rules={[{required: true, message: '不能为空'}]}>
-                                <Select onChange={onChangeDefectType}>
-                                    <Option value={1}>AJ（支管暗接）</Option>
-                                    <Option value={2}>BX（变形）</Option>
-                                    <Option value={3}>CJ（沉积）</Option>
-                                    <Option value={4}>CK（错口）</Option>
-                                    <Option value={5}>CQ（残墙、坝根）</Option>
-                                    <Option value={6}>CR（异物穿入）</Option>
-                                    <Option value={7}>FS（腐蚀）</Option>
-                                    <Option value={8}>FZ（浮渣）</Option>
-                                    <Option value={9}>JG（结垢）</Option>
-                                    <Option value={10}>PL（破裂）</Option>
-                                    <Option value={11}>QF（起伏）</Option>
-                                    <Option value={12}>SG（树根）</Option>
-                                    <Option value={13}>SL（渗漏）</Option>
-                                    <Option value={14}>TJ（脱节）</Option>
-                                    <Option value={15}>TL（接口材料脱落）</Option>
-                                    <Option value={16}>ZW（障碍物）</Option>
-                                </Select>
-                            </Form.Item>
-                            <Form.Item label="缺陷级别" name="defect_grade_id" rules={[{required: true, message: '不能为空'}]}>
-                                <Select>
-                                    {gradeOption}
-                                </Select>
-                            </Form.Item>
-                            <Form.Item label="缺陷距离" name="defect_distance">
-                                <InputNumber min={0}/>
-                            </Form.Item>
-                            <Form.Item label="缺陷长度" name="defect_length">
-                                <InputNumber min={0}/>
-                            </Form.Item>
-                            <Form.Item label="环向起点" name="clock_start">
-                                <InputNumber min={1} max={12} parser={limitNumber}/>
-                            </Form.Item>
-                            <Form.Item label="环向终点" name="clock_end">
-                                <InputNumber min={1} max={12} parser={limitNumber}/>
-                            </Form.Item>
-                            <Form.Item label="判读日期" name="defect_date">
-                                <Input disabled={true}/>
-                            </Form.Item>
-                            <Form.Item label="缺陷性质" name="defect_attribute">
-                                <Input disabled={true}/>
-                            </Form.Item>
-                            <Form.Item label="备注" name="defect_remark">
-                                <Input.TextArea autoSize={{minRows: 1}}/>
-                            </Form.Item>
-                            <Form.Item  {...tailFormItemLayout}>
-                                <Button type="primary" htmlType="submit">
-                                    确定
-                                </Button>
-                            </Form.Item>
-                        </Form>
-                        <Modal visible={isModalVisible} footer={null} width={200} centered closable={false}>
-                            {/*<Spin tip="处理中..." style={{marginLeft: "35%"}}/>*/}
-                            <Progress type="circle" percent={progress} style={{marginLeft: "10%"}}/>
-                            <Button shape="round" onClick={cancelAuto}
-                                    style={{marginLeft: "28%", marginTop: "10%"}}>取消</Button>
-                        </Modal>
-                    </Card>
-                </div>
-                <Drawer
-                    width="60%"
-                    visible={drawVisible}
-                    onClose={closeDraw}
-                    closable={false}
-                    keyboard={true}
-                    drawerStyle={{paddingTop: '10%'}}
-                    destroyOnClose={true}
-                >
-                    <DefectDraw
-                        defectId={drawDefectId}
-                        imgData={drawImgData}
-                        //通过ref，使父组件调用子组件里的方法和属性
-                        ref={defectDrawRef}
-                    />
-                </Drawer>
-            </Card>
+                        {/*</Affix>*/}
+                        <div style={{
+                            paddingTop: 10,
+                            height: "60vh",
+                            overflow: "auto",
+                            scrollBehavior: "smooth",
+                            overscrollBehavior: "contain"
+                        }}>
+                            <Form
+                                {...formItemLayout}
+                                form={form}
+                                scrollToFirstError
+                                size='large'
+                                onFinish={onFinish}
+                            >
+                                <Form.Item label="视频" name="video_id" rules={[{required: true, message: '不能为空'}]}>
+                                    <Input disabled={true}/>
+                                </Form.Item>
+                                <Form.Item label="视频内时间" name="time_in_video" rules={[{required: true, message: '不能为空'}]}>
+                                    <Input disabled={true}/>
+                                </Form.Item>
+                                <Form.Item label="缺陷类别" name="defect_type_id" rules={[{required: true, message: '不能为空'}]}>
+                                    <Select onChange={onChangeDefectType}>
+                                        <Option value={1}>AJ（支管暗接）</Option>
+                                        <Option value={2}>BX（变形）</Option>
+                                        <Option value={3}>CJ（沉积）</Option>
+                                        <Option value={4}>CK（错口）</Option>
+                                        <Option value={5}>CQ（残墙、坝根）</Option>
+                                        <Option value={6}>CR（异物穿入）</Option>
+                                        <Option value={7}>FS（腐蚀）</Option>
+                                        <Option value={8}>FZ（浮渣）</Option>
+                                        <Option value={9}>JG（结垢）</Option>
+                                        <Option value={10}>PL（破裂）</Option>
+                                        <Option value={11}>QF（起伏）</Option>
+                                        <Option value={12}>SG（树根）</Option>
+                                        <Option value={13}>SL（渗漏）</Option>
+                                        <Option value={14}>TJ（脱节）</Option>
+                                        <Option value={15}>TL（接口材料脱落）</Option>
+                                        <Option value={16}>ZW（障碍物）</Option>
+                                    </Select>
+                                </Form.Item>
+                                <Form.Item label="缺陷级别" name="defect_grade_id" rules={[{required: true, message: '不能为空'}]}>
+                                    <Select>
+                                        {gradeOption}
+                                    </Select>
+                                </Form.Item>
+                                <Form.Item label="缺陷距离" name="defect_distance">
+                                    <InputNumber min={0}/>
+                                </Form.Item>
+                                <Form.Item label="缺陷长度" name="defect_length">
+                                    <InputNumber min={0}/>
+                                </Form.Item>
+                                <Form.Item label="环向起点" name="clock_start">
+                                    <InputNumber min={1} max={12} parser={limitNumber}/>
+                                </Form.Item>
+                                <Form.Item label="环向终点" name="clock_end">
+                                    <InputNumber min={1} max={12} parser={limitNumber}/>
+                                </Form.Item>
+                                <Form.Item label="判读日期" name="defect_date">
+                                    <Input disabled={true}/>
+                                </Form.Item>
+                                <Form.Item label="缺陷性质" name="defect_attribute">
+                                    <Input disabled={true}/>
+                                </Form.Item>
+                                <Form.Item label="备注" name="defect_remark">
+                                    <Input.TextArea autoSize={{minRows: 1}}/>
+                                </Form.Item>
+                                <Form.Item  {...tailFormItemLayout}>
+                                    <Button type="primary" htmlType="submit">
+                                        确定
+                                    </Button>
+                                </Form.Item>
+                            </Form>
+                        </div>
+                    </div>
+                    <Modal visible={isModalVisible} footer={null} width={200} centered closable={false}>
+                        {/*<Spin tip="处理中..." style={{marginLeft: "35%"}}/>*/}
+                        <Progress type="circle" percent={progress} style={{marginLeft: "10%"}}/>
+                        <Button shape="round" onClick={cancelAuto}
+                                style={{marginLeft: "28%", marginTop: "10%"}}>取消</Button>
+                    </Modal>
+                    <Drawer
+                        width="60%"
+                        visible={drawVisible}
+                        onClose={closeDraw}
+                        closable={false}
+                        keyboard={true}
+                        drawerStyle={{paddingTop: '10%'}}
+                        destroyOnClose={true}
+                    >
+                        <DefectDraw
+                            defectId={drawDefectId}
+                            imgData={drawImgData}
+                            //通过ref，使父组件调用子组件里的方法和属性
+                            ref={defectDrawRef}
+                        />
+                    </Drawer>
+                </Card>
+            </>
         )
     }
 ;

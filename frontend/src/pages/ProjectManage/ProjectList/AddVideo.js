@@ -15,7 +15,7 @@ import {
     Row,
     Col,
     Upload,
-    Modal,
+    Modal, Breadcrumb,
 } from "antd";
 
 const {Option} = Select;
@@ -306,116 +306,144 @@ const AddVideo = () => {
     };
 
     return (
-        <Card>
-            <Form
-                {...formItemLayout}
-                form={form}
-                scrollToFirstError
-                onFinish={onFinish}
-                size="large"
-            >
-                <Row gutter={16}>
-                    <Col span={12}>
-                        <Form.Item label="选择文件">
-                            <Upload
-                                // onChange={handleUploadChange}
-                                // beforeUpload={handleBeforeUpload}
-                                // onRemove={handleOnRemove}
-                                {...props}
-                                multiple={isAddNewVideo}
-                                showUploadList={isAddNewVideo}
-                                accept="video/*"
-                                // fileList={fileList}
+        <>
+            <div style={{marginBottom: 10}}>
+                <Breadcrumb>
+                    <Breadcrumb.Item>
+                        <a href="javascript:" onClick={() => {
+                            history.push('/')
+                        }}>主页</a>
+                    </Breadcrumb.Item>
+                    <Breadcrumb.Item>
+                        <a href="javascript:" onClick={() => {
+                            history.push('/ProjectManage/ProjectList')
+                        }}>工程列表</a>
+                    </Breadcrumb.Item>
+                    <Breadcrumb.Item>
+                        <a href="javascript:" onClick={() => {
+                            history.push({
+                                pathname: "/ProjectManage/VideoList",
+                                state: {
+                                    project_id: location.state.project_id,
+                                    initialization: true,
+                                },
+                            })
+                        }}>视频列表</a>
+                    </Breadcrumb.Item>
+                    <Breadcrumb.Item>{location.state.isEdit ? "修改视频" : "添加视频"}</Breadcrumb.Item>
+                </Breadcrumb>
+            </div>
+            <Card>
+                <Form
+                    {...formItemLayout}
+                    form={form}
+                    scrollToFirstError
+                    onFinish={onFinish}
+                    size="large"
+                >
+                    <Row gutter={16}>
+                        <Col span={12}>
+                            <Form.Item label="选择文件">
+                                <Upload
+                                    // onChange={handleUploadChange}
+                                    // beforeUpload={handleBeforeUpload}
+                                    // onRemove={handleOnRemove}
+                                    {...props}
+                                    multiple={isAddNewVideo}
+                                    showUploadList={isAddNewVideo}
+                                    accept="video/*"
+                                    // fileList={fileList}
+                                >
+                                    <Button>选择文件</Button>
+                                </Upload>
+                            </Form.Item>
+                        </Col>
+                    </Row>
+                    <Row gutter={16}>
+                        <Col span={12}>
+                            <Form.Item
+                                label="视频文件名"
+                                name="name"
+                                rules={[{required: true, message: "不能为空"}]}
                             >
-                                <Button>选择文件</Button>
-                            </Upload>
-                        </Form.Item>
-                    </Col>
-                </Row>
-                <Row gutter={16}>
-                    <Col span={12}>
-                        <Form.Item
-                            label="视频文件名"
-                            name="name"
-                            rules={[{required: true, message: "不能为空"}]}
-                        >
-                            <Input disabled={true}/>
-                        </Form.Item>
-                    </Col>
-                    <Col span={12}>
-                        <Form.Item
-                            label="视频路径"
-                            name="path"
-                            rules={[{required: true, message: "不能为空"}]}
-                        >
-                            <Input disabled={true}/>
-                        </Form.Item>
-                    </Col>
-                </Row>
-                <Row gutter={16}>
-                    <Col span={12}>
-                        <Form.Item label="导入日期" name="import_date">
-                            <Input disabled={true}/>
-                        </Form.Item>
-                    </Col>
-                    <Col span={12}>
-                        <Form.Item
-                            label="所属管线"
-                            name="line_id"
-                            rules={[{required: true, message: "不能为空"}]}
-                            locale={{emptyText: "未添加管线"}}
-                        >
-                            <Select notFoundContent="未添加管线">{lineOption}</Select>
-                        </Form.Item>
-                    </Col>
-                </Row>
-                <Row gutter={16}>
-                    <Col span={12}>
-                        <Form.Item label="检测日期/录制日期" name="record_date">
-                            <DatePicker/>
-                        </Form.Item>
-                    </Col>
-                    <Col span={12}>
-                        <Form.Item label="备注" name="remark">
-                            <Input.TextArea autoSize={{minRows: 1}}/>
-                        </Form.Item>
-                    </Col>
-                </Row>
-                <Form.Item {...tailFormItemLayout}>
-                    <Affix offsetBottom={10}>
-                        <Button type="primary" htmlType="submit">
-                            确定
-                        </Button>
-                        <Button
-                            onClick={() => {
-                                history.push({
-                                    pathname: "/ProjectManage/VideoList",
-                                    state: {
-                                        project_id: location.state.project_id,
-                                        initialization: true,
-                                    },
-                                });
-                            }}
-                        >
-                            返回
-                        </Button>
-                    </Affix>
-                </Form.Item>
-            </Form>
-            {/*<Modal*/}
-            {/*    title="文件目录"*/}
-            {/*    visible={isModalVisible}*/}
-            {/*    onOk={handleOk}*/}
-            {/*    onCancel={handleCancel}*/}
-            {/*    maskClosable={false}*/}
-            {/*>*/}
-            {/*    <Form form={dirForm}>*/}
-            {/*        <Form.Item name="videoDir">*/}
-            {/*            <Input/>*/}
-            {/*        </Form.Item>*/}
-            {/*    </Form>*/}
-            {/*</Modal>*/}
-        </Card>
+                                <Input disabled={true}/>
+                            </Form.Item>
+                        </Col>
+                        <Col span={12}>
+                            <Form.Item
+                                label="视频路径"
+                                name="path"
+                                rules={[{required: true, message: "不能为空"}]}
+                            >
+                                <Input disabled={true}/>
+                            </Form.Item>
+                        </Col>
+                    </Row>
+                    <Row gutter={16}>
+                        <Col span={12}>
+                            <Form.Item label="导入日期" name="import_date">
+                                <Input disabled={true}/>
+                            </Form.Item>
+                        </Col>
+                        <Col span={12}>
+                            <Form.Item
+                                label="所属管线"
+                                name="line_id"
+                                rules={[{required: true, message: "不能为空"}]}
+                                locale={{emptyText: "未添加管线"}}
+                            >
+                                <Select notFoundContent="未添加管线">{lineOption}</Select>
+                            </Form.Item>
+                        </Col>
+                    </Row>
+                    <Row gutter={16}>
+                        <Col span={12}>
+                            <Form.Item label="检测日期/录制日期" name="record_date">
+                                <DatePicker/>
+                            </Form.Item>
+                        </Col>
+                        <Col span={12}>
+                            <Form.Item label="备注" name="remark">
+                                <Input.TextArea autoSize={{minRows: 1}}/>
+                            </Form.Item>
+                        </Col>
+                    </Row>
+                    <Form.Item {...tailFormItemLayout}>
+                        <Affix offsetBottom={10}>
+                            <Button type="primary" htmlType="submit">
+                                确定
+                            </Button>
+                            <Button
+                                onClick={() => {
+                                    history.push({
+                                        pathname: "/ProjectManage/VideoList",
+                                        state: {
+                                            project_id: location.state.project_id,
+                                            initialization: true,
+                                        },
+                                    });
+                                }}
+                            >
+                                返回
+                            </Button>
+                        </Affix>
+                    </Form.Item>
+                </Form>
+                {/*<Modal*/}
+                {/*    title="文件目录"*/}
+                {/*    visible={isModalVisible}*/}
+                {/*    onOk={handleOk}*/}
+                {/*    onCancel={handleCancel}*/}
+                {/*    maskClosable={false}*/}
+                {/*>*/}
+                {/*    <Form form={dirForm}>*/}
+                {/*        <Form.Item name="videoDir">*/}
+                {/*            <Input/>*/}
+                {/*        </Form.Item>*/}
+                {/*    </Form>*/}
+                {/*</Modal>*/}
+            </Card>
+        </>
     );
 };
 
