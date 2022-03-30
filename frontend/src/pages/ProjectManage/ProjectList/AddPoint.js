@@ -175,7 +175,13 @@ const AddPoint = () => {
                             })
                         }}>管点列表</a>
                     </Breadcrumb.Item>
-                    <Breadcrumb.Item>{location.state.isEdit ? "修改管点" : "添加管点"}</Breadcrumb.Item>
+                    <Breadcrumb.Item>{() => {
+                        try {
+                            return location.state.isEdit ? "修改管点" : "添加管点";
+                        } catch (e) {
+                            history.push('/ProjectManage/ProjectList')
+                        }
+                    }}</Breadcrumb.Item>
                 </Breadcrumb>
             </div>
             <Card>

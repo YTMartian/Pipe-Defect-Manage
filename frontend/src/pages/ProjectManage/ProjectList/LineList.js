@@ -43,7 +43,8 @@ const LineList = () => {
                         material: response.data.list[i]['fields']['material'],
                         diameter: response.data.list[i]['fields']['diameter'],
                         remark: response.data.list[i]['fields']['remark'],
-                        point_count: response.data.list[i]['fields']['point_count']
+                        point_count: response.data.list[i]['fields']['point_count'],
+                        video_count: response.data.list[i]['fields']['video_count'],
                     });
                 }
                 setData({currentData: newData, allData: newData});
@@ -156,7 +157,7 @@ const LineList = () => {
             title: '流向',
             dataIndex: 'flow_direction',
             editable: true,
-            width: "24%",
+            width: "21%",
             ellipsis: {
                 showTitle: false,
             },
@@ -175,7 +176,7 @@ const LineList = () => {
         {
             title: '管径',
             editable: true,
-            width: "17%",
+            width: "10%",
             dataIndex: 'diameter',
             ellipsis: {
                 showTitle: false,
@@ -184,7 +185,7 @@ const LineList = () => {
         },
         {
             title: "管点",
-            dataIndex: "Point",
+            dataIndex: "point",
             width: "10%",
             align: "center",
             render: (_, record) => (
@@ -199,6 +200,26 @@ const LineList = () => {
                         pathname: '/ProjectManage/PointList',
                         state: {project_id: location.state.project_id, line_id: record.key, initialization: true}
                     })}>管点</a>
+                </Badge>
+            )
+        },
+        {
+            title: "视频",
+            dataIndex: "video",
+            width: "10%",
+            align: "center",
+            render: (_, record) => (
+                // eslint-disable-next-line jsx-a11y/anchor-is-valid,no-script-url
+                <Badge count={record.video_count}
+                       offset={[13, -7]}
+                       size="small"
+                       style={{backgroundColor: '#52c41a'}}
+                       showZero={false}
+                >
+                    <a href="javascript:" onClick={() => history.push({
+                        pathname: '/ProjectManage/VideoList',
+                        state: {project_id: location.state.project_id, line_id: record.key, initialization: true}
+                    })}>视频</a>
                 </Badge>
             )
         },
@@ -235,7 +256,7 @@ const LineList = () => {
                             history.push('/ProjectManage/ProjectList')
                         }}>工程列表</a>
                     </Breadcrumb.Item>
-                    <Breadcrumb.Item>视频列表</Breadcrumb.Item>
+                    <Breadcrumb.Item>管线列表</Breadcrumb.Item>
                 </Breadcrumb>
             </div>
             <div>

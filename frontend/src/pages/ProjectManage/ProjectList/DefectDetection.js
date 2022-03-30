@@ -20,7 +20,8 @@ import {
     Modal,
     Progress,
     Drawer,
-    Breadcrumb, Image,
+    Breadcrumb,
+    Space
 } from 'antd'
 
 import {
@@ -99,6 +100,9 @@ const DefectDetection = () => {
         const [drawImgData, setDrawImgData] = useState("");
         let canvasRef = useRef();
 
+        //如果是从管线列表页跳转过来的，那么就会用到以下的东西
+        const [lineBreadcrumb, setLineBreadcrumb] = useState(undefined);
+
         const setCurrentDefect = () => {
             let index = currentDefectIndex.current;
             if (index === -1) {
@@ -175,8 +179,8 @@ const DefectDetection = () => {
                 let seconds = timeToSeconds(allDefects.current[i]['fields']['time_in_video']);
                 let position = Math.round((seconds * videoRef.current.offsetWidth) / totalSeconds);
                 //防止圆跑到外面去
-                if(position < 5) position = 5;
-                else if(position > videoRef.current.offsetWidth - 5) position = videoRef.current.offsetWidth - 5;
+                if (position < 5) position = 5;
+                else if (position > videoRef.current.offsetWidth - 5) position = videoRef.current.offsetWidth - 5;
                 svg.appendChild(roughSvg.circle(position, 6, 10, {
                     fill: "rgba(242, 60, 60, 0.9)",
                     fillStyle: 'solid',
@@ -256,6 +260,18 @@ const DefectDetection = () => {
                     message.error('获取视频失败:' + error, 3);
                 });
                 getAllDefects();
+                if (location.state.line_id !== undefined) {
+                    setLineBreadcrumb(
+                        <Breadcrumb.Item>
+                            <a href="javascript:" onClick={() => {
+                                history.push({
+                                    pathname: '/ProjectManage/LineList',
+                                    state: {project_id: location.state.project_id, initialization: true}
+                                })
+                            }}>管线列表</a>
+                        </Breadcrumb.Item>
+                    );
+                }
             }
         } catch
             (e) {
@@ -599,8 +615,8 @@ const DefectDetection = () => {
                 let seconds = timeToSeconds(allDefects.current[i]['fields']['time_in_video']);
                 let position = Math.round((seconds * videoRef.current.offsetWidth) / totalSeconds);
                 //防止圆跑到外面去
-                if(position < 5) position = 5;
-                else if(position > videoRef.current.offsetWidth - 5) position = videoRef.current.offsetWidth - 5;
+                if (position < 5) position = 5;
+                else if (position > videoRef.current.offsetWidth - 5) position = videoRef.current.offsetWidth - 5;
                 if (nowX >= position - 5 && nowX <= position + 5) {
                     currentDefectIndex.current = i;
                     setCurrentDefect();
@@ -625,8 +641,8 @@ const DefectDetection = () => {
                 let seconds = timeToSeconds(allDefects.current[i]['fields']['time_in_video']);
                 let position = Math.round((seconds * videoRef.current.offsetWidth) / totalSeconds);
                 //防止圆跑到外面去
-                if(position < 5) position = 5;
-                else if(position > videoRef.current.offsetWidth - 5) position = videoRef.current.offsetWidth - 5;
+                if (position < 5) position = 5;
+                else if (position > videoRef.current.offsetWidth - 5) position = videoRef.current.offsetWidth - 5;
                 if (nowX >= position - 5 && nowX <= position + 5) {//如果鼠标移动到了某个缺线圆形上
                     svg.appendChild(roughSvg.circle(position, 6, 12, {
                         fill: "rgba(242, 60, 60, 0.9)",
@@ -660,11 +676,16 @@ const DefectDetection = () => {
                                 history.push('/ProjectManage/ProjectList')
                             }}>工程列表</a>
                         </Breadcrumb.Item>
+                        {lineBreadcrumb}
                         <Breadcrumb.Item>
                             <a href="javascript:" onClick={() => {
                                 history.push({
                                     pathname: '/ProjectManage/VideoList',
-                                    state: {project_id: location.state.project_id, initialization: true}
+                                    state: {
+                                        project_id: location.state.project_id,
+                                        line_id: location.state.line_id,
+                                        initialization: true
+                                    }
                                 })
                             }}>视频列表</a>
                         </Breadcrumb.Item>
@@ -734,41 +755,37 @@ const DefectDetection = () => {
                         {/*<Affix offsetTop={100}>*/}
                         <Card>
                             <Row gutter={24} justify="center">
-                                <Col span={4}>
-                                    <Button
-                                        size="large"
-                                        onClick={() => {
-                                            history.push({
-                                                pathname: '/ProjectManage/VideoList',
-                                                state: {project_id: location.state.project_id, initialization: true}
-                                            })
-                                        }}
-                                    >
-                                        返回
-                                    </Button>
-                                </Col>
-                                <Col span={3}>
-                                    <Button size="large" icon={<CaretLeftFilled/>} onClick={previousDefect}/>
-                                </Col>
-                                <Col span={4}>
-                                    <Button size="large" type="primary" onClick={handleAdd}>
-                                        标记
-                                    </Button>
-                                </Col>
-                                <Col span={4}>
-                                    <Popconfirm title="确定删除?" onConfirm={handleDelete} disabled={deleteDisable}>
-                                        <Button size="large" danger type="primary">
-                                            删除
+                                <Col>
+                                    <Space align="baseline" wrap={true}>
+                                        <Button
+                                            size="default"
+                                            onClick={() => {
+                                                history.push({
+                                                    pathname: '/ProjectManage/VideoList',
+                                                    state: {
+                                                        project_id: location.state.project_id,
+                                                        line_id: location.state.line_id,
+                                                        initialization: true
+                                                    }
+                                                })
+                                            }}
+                                        >
+                                            返回
                                         </Button>
-                                    </Popconfirm>
-                                </Col>
-                                <Col span={4}>
-                                    <Button size="large" type="primary" onClick={openDraw} disabled={deleteDisable}>
-                                        绘制
-                                    </Button>
-                                </Col>
-                                <Col span={4}>
-                                    <Button size="large" icon={<CaretRightFilled/>} onClick={nextDefect}/>
+                                        <Button size="default" icon={<CaretLeftFilled/>} onClick={previousDefect}/>
+                                        <Button size="default" type="primary" onClick={handleAdd}>
+                                            标记
+                                        </Button>
+                                        <Popconfirm title="确定删除?" onConfirm={handleDelete} disabled={deleteDisable}>
+                                            <Button size="default" danger type="primary">
+                                                删除
+                                            </Button>
+                                        </Popconfirm>
+                                        <Button size="default" type="primary" onClick={openDraw} disabled={deleteDisable}>
+                                            绘制
+                                        </Button>
+                                        <Button size="default" icon={<CaretRightFilled/>} onClick={nextDefect}/>
+                                    </Space>
                                 </Col>
                             </Row>
                         </Card>

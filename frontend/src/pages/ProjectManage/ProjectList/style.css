@@ -56,3 +56,9 @@ video::-webkit-media-controls-enclosure {
     -o-user-select:none;
     -ms-user-select:none;
 }
+
+/*解决之前图标总是向下偏的问题，通过F12调试得出问题所在*/
+.anticon {
+    /*padding-bottom: 9px;*/
+    vertical-align:0;
+}

@@ -113,6 +113,8 @@ def get_line(request):
         for i in range(len(res['list'])):
             res['list'][i]['fields']['point_count'] = models.Point.objects.filter(
                     line_id = res['list'][i]['pk']).count()
+            res['list'][i]['fields']['video_count'] = models.Video.objects.filter(
+                    line_id = res['list'][i]['pk']).count()
         res['msg'] = 'success'
         res['code'] = 0
     except Exception as e:
@@ -256,7 +258,10 @@ def get_video(request):
         data = json.loads(request.body.decode('utf-8'))
         videos = None
         if data['condition'] == 'all':
-            videos = models.Video.objects.filter(project_id = data['project_id'])
+            if 'line_id' in data:
+                videos = models.Video.objects.filter(line_id = data['line_id'])
+            else:
+                videos = models.Video.objects.filter(project_id = data['project_id'])
             videos = reversed(videos)
         elif data['condition'] == 'video_id':
             videos = models.Video.objects.filter(video_id = data['video_id'])

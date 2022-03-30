@@ -25,6 +25,9 @@ const VideoList = () => {
     const [data, setData] = useState({currentData: [], allData: []});
     const [state, setState] = useState({selectedRowKeys: []});//使用state从而更改数据后能够实时更新
 
+    //如果是从管线列表页跳转过来的，那么就会用到以下的东西
+    const [lineBreadcrumb, setLineBreadcrumb] = useState(undefined);
+
     const getVideo = () => {
         request({
             method: 'post',
@@ -32,6 +35,7 @@ const VideoList = () => {
             data: {
                 "condition": "all",
                 "project_id": location.state.project_id,
+                "line_id": location.state.line_id,
             },
         }).then(function (response) {
             if (response.data.code === 0) {
@@ -59,6 +63,18 @@ const VideoList = () => {
     try {
         if (location.state.initialization) {
             getVideo();
+            if (location.state.line_id !== undefined) {
+                setLineBreadcrumb(
+                    <Breadcrumb.Item>
+                        <a href="javascript:" onClick={() => {
+                            history.push({
+                                pathname: '/ProjectManage/LineList',
+                                state: {project_id: location.state.project_id, initialization: true}
+                            })
+                        }}>管线列表</a>
+                    </Breadcrumb.Item>
+                );
+            }
             location.state.initialization = false;
         }
     } catch (e) {
@@ -152,6 +168,7 @@ const VideoList = () => {
                             isEdit: true,
                             video_id: record.key,
                             project_id: location.state.project_id,
+                            line_id:location.state.line_id,
                             initialization: true,
                             isAddNewVideo: false,//是否是添加视频，如果是，就可以多选文件，否则不能。
                         }
@@ -234,23 +251,14 @@ const VideoList = () => {
                             isEdit: true,
                             video_id: record.key,
                             project_id: location.state.project_id,
+                            line_id:location.state.line_id,
                             path: record.path,
                             initialization: true
                         }
                     })}>缺陷</a>
                 </Badge>
             )
-        },
-        // {
-        //     title: '数量',
-        //     editable: true,
-        //     width: "10%",
-        //     dataIndex: 'count',
-        //     ellipsis: {
-        //         showTitle: false,
-        //     },
-        //     align: "center",
-        // }
+        }
     ];
     return (
         <>
@@ -266,13 +274,22 @@ const VideoList = () => {
                             history.push('/ProjectManage/ProjectList')
                         }}>工程列表</a>
                     </Breadcrumb.Item>
+                    {lineBreadcrumb}
                     <Breadcrumb.Item>视频列表</Breadcrumb.Item>
                 </Breadcrumb>
             </div>
             <div>
                 <Button
                     onClick={() => {
-                        history.push('/ProjectManage/ProjectList')
+                        if(location.state.line_id !== undefined) {//是从管线列表跳转过来的
+                            history.push({
+                                pathname: '/ProjectManage/LineList',
+                                state: {project_id: location.state.project_id, initialization: true}
+                            })
+                        } else {
+                            history.push('/ProjectManage/ProjectList')
+                        }
+
                     }}
                     style={{float: 'left'}}
                 >
@@ -285,6 +302,7 @@ const VideoList = () => {
                             state: {
                                 isEdit: false,
                                 project_id: location.state.project_id,
+                                line_id:location.state.line_id,
                                 initialization: true,
                                 isAddNewVideo: true,//是否是添加视频，如果是，就可以多选文件，否则不能。
                             }

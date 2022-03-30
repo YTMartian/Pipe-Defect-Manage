@@ -67,6 +67,10 @@ const AddVideo = () => {
     const [lineOption, setLineOption] = useState(undefined);
     const fileList = useRef([]);
     const [isAddNewVideo, setIsAddNewVideo] = useState(true);
+
+    //如果是从管线列表页跳转过来的，那么就会用到以下的东西
+    const [lineBreadcrumb, setLineBreadcrumb] = useState(undefined);
+
     try {
         if (location.state.initialization) {
             location.state.initialization = false;
@@ -95,6 +99,18 @@ const AddVideo = () => {
                 .catch(function (error) {
                     message.error("获取管线失败2:" + error, 3);
                 });
+            if (location.state.line_id !== undefined) {
+                setLineBreadcrumb(
+                    <Breadcrumb.Item>
+                        <a href="javascript:" onClick={() => {
+                            history.push({
+                                pathname: '/ProjectManage/LineList',
+                                state: {project_id: location.state.project_id, initialization: true}
+                            })
+                        }}>管线列表</a>
+                    </Breadcrumb.Item>
+                );
+            }
             if (location.state.isEdit) {
                 request({
                     method: "post",
@@ -172,6 +188,7 @@ const AddVideo = () => {
                             pathname: "/ProjectManage/VideoList",
                             state: {
                                 project_id: location.state.project_id,
+                                line_id:location.state.line_id,
                                 initialization: true,
                             },
                         });
@@ -188,13 +205,13 @@ const AddVideo = () => {
     const props = {
         onRemove: (file) => {
             let index = -1;
-            for(let i = 0; i < fileList.current.length; i++) {
-                if(file.uid === fileList.current[i].uid) {
+            for (let i = 0; i < fileList.current.length; i++) {
+                if (file.uid === fileList.current[i].uid) {
                     index = i;
                     break;
                 }
             }
-            if(index === -1) {
+            if (index === -1) {
                 message.error("error: index=-1");
                 return;
             }
@@ -252,12 +269,14 @@ const AddVideo = () => {
                             history.push('/ProjectManage/ProjectList')
                         }}>工程列表</a>
                     </Breadcrumb.Item>
+                    {lineBreadcrumb}
                     <Breadcrumb.Item>
                         <a href="javascript:" onClick={() => {
                             history.push({
                                 pathname: "/ProjectManage/VideoList",
                                 state: {
                                     project_id: location.state.project_id,
+                                    line_id: location.state.line_id,
                                     initialization: true,
                                 },
                             })
@@ -352,6 +371,7 @@ const AddVideo = () => {
                                         pathname: "/ProjectManage/VideoList",
                                         state: {
                                             project_id: location.state.project_id,
+                                            line_id:location.state.line_id,
                                             initialization: true,
                                         },
                                     });

@@ -349,7 +349,6 @@ const AddLine = () => {
                             <Form.Item label="管径" name="diameter" rules={[{required: true, message: '不能为空'}]}>
                                 <InputNumber/>
                             </Form.Item>
-
                         </Col>
                     </Row>
                     <Row gutter={16}>
