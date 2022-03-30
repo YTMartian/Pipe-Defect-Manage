@@ -8,6 +8,7 @@ urlpatterns = [
     path('get_line/', views.get_line),
     path('delete_line/', views.delete_line),
     path('add_line/', views.add_line),
+    path('get_line_auto_fill/', views.get_line_auto_fill),
     path('get_point/', views.get_point),
     path('delete_point/', views.delete_point),
     path('add_point/', views.add_point),

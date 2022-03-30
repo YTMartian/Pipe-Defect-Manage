@@ -20,7 +20,6 @@ import time
 import os
 import cv2
 
-
 os.environ['CUDA_VISIBLE_DEVICES'] = '/gpu:0'
 
 '''
@@ -157,6 +156,31 @@ def add_line(request):
             models.Line.objects.create(**data['values'])
         res['msg'] = 'success'
         res['code'] = 0
+    except Exception as e:
+        error_line = e.__traceback__.tb_lineno  # 出错行数
+        res['msg'] = str(repr(e)) + ' line({})'.format(error_line)
+        res['code'] = 1
+    return JsonResponse(res)
+
+
+@csrf_exempt
+@require_http_methods(['POST'])
+def get_line_auto_fill(request):
+    res = {}
+    try:
+        data = json.loads(request.body.decode('utf-8'))
+        lines = None
+        if 'line_id' in data:
+            lines = models.Line.objects.filter(project_id = data['project_id']).exclude(line_id = data['line_id'])
+        else:
+            lines = models.Line.objects.filter(project_id = data['project_id'])
+        if lines is None or len(lines) == 0:
+            res['msg'] = 'no lines'
+            res['code'] = 2
+        else:
+            res['list'] = json.loads(serializers.serialize('json', lines))
+            res['msg'] = 'success'
+            res['code'] = 0
     except Exception as e:
         error_line = e.__traceback__.tb_lineno  # 出错行数
         res['msg'] = str(repr(e)) + ' line({})'.format(error_line)

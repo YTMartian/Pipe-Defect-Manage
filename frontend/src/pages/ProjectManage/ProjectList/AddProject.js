@@ -133,7 +133,7 @@ const AddProject = () => {
         values.start_date = values.start_date != null ? moment(values.start_date).format("YYYY-MM-DD") : "";
         let data = {"isEdit": false, "values": values};
         data['values'].staff = selectStaffs;
-        console.log(data);
+        // console.log(data);
         if (location.state.isEdit) {
             data = {"isEdit": true, "values": values, "project_id": location.state.project_id}
         }
@@ -248,7 +248,7 @@ const AddProject = () => {
                     form={form}
                     scrollToFirstError
                     onFinish={onFinish}
-                    size='large'
+                    size='default'
                 >
                     <Row gutter={16}>
                         <Col span={12}>

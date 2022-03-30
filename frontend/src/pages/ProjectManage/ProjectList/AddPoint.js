@@ -184,7 +184,7 @@ const AddPoint = () => {
                     form={form}
                     scrollToFirstError
                     onFinish={onFinish}
-                    size='large'
+                    size='default'
                 >
                     <Row gutter={16}>
                         <Col span={12}>

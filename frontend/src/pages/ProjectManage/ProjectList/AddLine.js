@@ -14,8 +14,12 @@ import {
     Select,
     Affix,
     Row,
-    Col, Breadcrumb
+    Col,
+    Breadcrumb,
+    Tooltip,
+    Space
 } from 'antd'
+import {QuestionCircleOutlined} from "@ant-design/icons";
 
 const {Option} = Select;
 
@@ -150,6 +154,41 @@ const AddLine = () => {
         });
     };
 
+    const autoFill = () => {
+        request({
+            method: 'post',
+            url: 'get_line_auto_fill/',
+            data: {
+                "line_id": location.state.line_id,
+                "project_id": location.state.project_id
+            },
+        }).then(function (response) {
+            if (response.data.code === 0) {
+                form.setFieldsValue({
+                    burial_way: response.data.list[0]['fields']['burial_way'],
+                    burial_year: response.data.list[0]['fields']['burial_year'],
+                    ownership: response.data.list[0]['fields']['ownership'],
+                    use_state: response.data.list[0]['fields']['use_state'],
+                    detection_unit: response.data.list[0]['fields']['detection_unit'],
+                    supervisor_unit: response.data.list[0]['fields']['supervisor_unit'],
+                    state: response.data.list[0]['fields']['state'],
+                    precision_level: response.data.list[0]['fields']['precision_level'],
+                    type: response.data.list[0]['fields']['type']
+                });
+                if (response.data.list[0]['fields']['detection_date'].length > 0) {
+                    form.setFieldsValue({detection_date: moment(response.data.list[0]['fields']['detection_date'], 'YYYY-MM-DD')})
+                }
+                message.success("填入成功", 3);
+            } else if (response.data.code === 2) {
+                message.info("该工程下未有任何管线信息", 3);
+            } else {
+                message.error('自动填入失败:' + response.data.msg, 3)
+            }
+        }).catch(function (error) {
+            message.error(error);
+        });
+    }
+
     return (
         <>
             <div style={{marginBottom: 10}}>
@@ -172,7 +211,13 @@ const AddLine = () => {
                             })
                         }}>管线列表</a>
                     </Breadcrumb.Item>
-                    <Breadcrumb.Item>{location.state.isEdit ? "修改管线" : "添加管线"}</Breadcrumb.Item>
+                    <Breadcrumb.Item>{() => {
+                        try {
+                            return location.state.isEdit ? "修改管线" : "添加管线";
+                        } catch (e) {
+                            history.push('/ProjectManage/ProjectList')
+                        }
+                    }}</Breadcrumb.Item>
                 </Breadcrumb>
             </div>
             <Card>
@@ -181,7 +226,7 @@ const AddLine = () => {
                     form={form}
                     scrollToFirstError
                     onFinish={onFinish}
-                    size='large'
+                    size='default'
                 >
                     <Row gutter={16}>
                         <Col span={12}>
@@ -269,19 +314,19 @@ const AddLine = () => {
                     </Row>
                     <Row gutter={16}>
                         <Col span={12}>
-                            <Form.Item label="总长度" name="total_length">
+                            <Form.Item label="总长度" name="total_length" rules={[{required: true, message: '不能为空'}]}>
                                 <InputNumber min={0}/>
                             </Form.Item>
                         </Col>
                         <Col span={12}>
-                            <Form.Item label="检测长度" name="detection_length">
+                            <Form.Item label="检测长度" name="detection_length" rules={[{required: true, message: '不能为空'}]}>
                                 <InputNumber min={0}/>
                             </Form.Item>
                         </Col>
                     </Row>
                     <Row gutter={16}>
                         <Col span={12}>
-                            <Form.Item label="流向" name="flow_direction">
+                            <Form.Item label="流向" name="flow_direction" rules={[{required: true, message: '不能为空'}]}>
                                 <Select>
                                     <Option value={0}>顺流</Option>
                                     <Option value={1}>逆流</Option>
@@ -289,43 +334,57 @@ const AddLine = () => {
                             </Form.Item>
                         </Col>
                         <Col span={12}>
-                            <Form.Item label="管线亚级类" name="sub_level_type">
+                            <Form.Item label="管线亚级类" name="sub_level_type" rules={[{required: true, message: '不能为空'}]}>
                                 <Input/>
                             </Form.Item>
                         </Col>
                     </Row>
                     <Row gutter={16}>
                         <Col span={12}>
-                            <Form.Item label="材质" name="material">
+                            <Form.Item label="材质" name="material" rules={[{required: true, message: '不能为空'}]}>
                                 <Input/>
                             </Form.Item>
                         </Col>
                         <Col span={12}>
-                            <Form.Item label="埋设方式" name="burial_way">
-                                <Input/>
-                            </Form.Item>
-                        </Col>
-                    </Row>
-                    <Row gutter={16}>
-                        <Col span={12}>
-                            <Form.Item label="管径" name="diameter">
+                            <Form.Item label="管径" name="diameter" rules={[{required: true, message: '不能为空'}]}>
                                 <InputNumber/>
                             </Form.Item>
+
                         </Col>
+                    </Row>
+                    <Row gutter={16}>
+                        <Col span={12}>
+                            <Form.Item label="所在道路" name="road_where" rules={[{required: true, message: '不能为空'}]}>
+                                <Input/>
+                            </Form.Item>
+                        </Col>
+                        <Col span={12}>
+                            <Form.Item label="埋设方式">
+                                <Space>
+                                    <Form.Item label="埋设方式" name="burial_way" noStyle>
+                                        <Input/>
+                                    </Form.Item>
+                                    < div style={{display: 'flex'}}>
+                                        <Button onClick={autoFill} type='link'>
+                                            自动填入
+                                        </Button>
+                                        <Tooltip title="自动填入上一管线的权属单位、使用状态、埋设方式、埋设年代等信息">
+                                            <QuestionCircleOutlined style={{marginTop: 10}}/>
+                                        </Tooltip>
+                                    </div>
+                                </Space>
+                            </Form.Item>
+                        </Col>
+
+                    </Row>
+                    <Row gutter={16}>
                         <Col span={12}>
                             <Form.Item label="埋设年代" name="burial_year">
                                 <InputNumber min={1900}/>
                             </Form.Item>
                         </Col>
-                    </Row>
-                    <Row gutter={16}>
                         <Col span={12}>
                             <Form.Item label="权属单位" name="ownership">
-                                <Input/>
-                            </Form.Item>
-                        </Col>
-                        <Col span={12}>
-                            <Form.Item label="所在道路" name="road_where">
                                 <Input/>
                             </Form.Item>
                         </Col>
