@@ -36,6 +36,8 @@
 
 - 运行django并隐藏CMD窗口：start.bat & start.vbs 
 
+- innoSetup.iss：inno setup打包脚本。
+
 #### 代办
 
 1.工程列表不能以负责人进行搜索。
