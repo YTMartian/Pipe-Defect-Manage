@@ -33,7 +33,8 @@ def myRun(cmd):
     return process.stdout
 
 def main2():
-    server_process = subprocess.Popen(['cscript.exe', "start.vbs"])
+    # server_process = subprocess.Popen(['cscript.exe', "start.vbs"])
+    server_process = subprocess.Popen(['./manage/manage.exe', 'runserver', '127.0.0.1:4399'], creationflags = subprocess.CREATE_NO_WINDOW) # 隐藏控制台
     browser_process = subprocess.Popen('./browser-win32-x64/browser.exe')
     while True:
         # 获取进程状态，None表示还在运行.

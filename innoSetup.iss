@@ -34,7 +34,6 @@ Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{
 
 [Files]
 Source: "F:\Graduation-Project\缺陷管理软件6\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
-Source: "F:\Graduation-Project\缺陷管理软件6\start.vbs"; DestDir: "{app}"; Flags: ignoreversion
 Source: "F:\Graduation-Project\缺陷管理软件6\template.docx"; DestDir: "{app}"; Flags: ignoreversion
 Source: "F:\Graduation-Project\缺陷管理软件6\browser-win32-x64\*"; DestDir: "{app}\browser-win32-x64"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "F:\Graduation-Project\缺陷管理软件6\manage\*"; DestDir: "{app}\manage"; Flags: ignoreversion recursesubdirs createallsubdirs
